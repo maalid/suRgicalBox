@@ -25,10 +25,10 @@ Su uso está orientado para el armado de cajas quirúrgicas, sin embargo, el pro
 
 ## Instalación
 
-Puede instalar la versión actual de suRgicalBox desde [CRAN](https://CRAN.R-project.org) usando:
+Puede instalar la versión actual de suRgicalBox desde [GitHub](https://CRAN.R-project.org) usando:
 
 ```
-install.packages("suRgicalBox")
+remotes::install_github("maalid/suRgicalBox")
 ```
 
 

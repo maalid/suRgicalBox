@@ -24,9 +24,9 @@ aplicaciones sin problemas.
 ## Instalación
 
 Puede instalar la versión actual de suRgicalBox desde
-[CRAN](https://CRAN.R-project.org) usando:
+[GitHub](https://CRAN.R-project.org) usando:
 
-    install.packages("suRgicalBox")
+    remotes::install_github("maalid/suRgicalBox")
 
 ## Código de Conducta
 
