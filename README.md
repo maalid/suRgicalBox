@@ -21,14 +21,19 @@ Su uso está orientado para el armado de cajas quirúrgicas, sin embargo,
 el proceso es genérico, por lo que puede extenderse su uso a otras
 aplicaciones sin problemas.
 
-## Installation
+## Instalación
 
 Puede instalar la versión actual de suRgicalBox desde
 [CRAN](https://CRAN.R-project.org) usando:
 
     install.packages("suRgicalBox")
 
-## Code of Conduct
+## Código de Conducta
+
+Tenga en cuenta que el proyecto suRgicalBox se publica con un [Código de
+conducta para
+colaboradores](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html).
+Al contribuir a este proyecto, acepta cumplir sus términos.
 
 Please note that the suRgicalBox project is released with a [Contributor
 Code of
