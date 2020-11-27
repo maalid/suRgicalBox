@@ -19,11 +19,36 @@ Imports:
     DT,
     glue,
     htmltools,
-    thinkr
+    thinkr,
+    tibble,
+    shinyjs,
+    shinyBS,
+    readr,
+    dplyr,
+    stringr,
+    keras,
+    shinyalert,
+    reticulate,
+    forcats,
+    ggplot2,
+    reshape2,
+    magrittr,
+    tensorflow,
+    base64enc,
+    fs,
+    magick,
+    serial,
+    shinyFiles,
+    shinyWidgets,
+    shinythemes,
+    sketcher,
+    shinymanager
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.0
 URL: https://github.com/maalid/suRgicalBox.git
 BugReports: https://github.com/maalid/suRgicalBox.git/issues
 Suggests: 
     testthat
+Depends: 
+    R (>= 2.10)

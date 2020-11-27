@@ -1,3 +1,4 @@
+if (interactive()) {
 context("golem tests")
 
 library(golem)
@@ -31,7 +32,7 @@ test_that(
   }
 )
 
-
+}
 
 
 

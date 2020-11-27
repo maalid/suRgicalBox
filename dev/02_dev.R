@@ -16,7 +16,23 @@
 ## Dependencies ----
 ## Add one line by package you want to add as dependency
 usethis::use_package( "thinkr" )
-
+usethis::use_package( "tibble" )
+usethis::use_package( "shinyjs" )
+usethis::use_package( "shinyBS" )
+usethis::use_package( "DT" )
+usethis::use_package( "glue" )
+usethis::use_package( "readr" )
+usethis::use_package( "dplyr" )
+usethis::use_package( "stringr" )
+usethis::use_package( "keras" )
+usethis::use_package( "shinyalert" )
+usethis::use_package( "reticulate" )
+usethis::use_package( "forcats" )
+usethis::use_package( "ggplot2" )
+usethis::use_package( "reshape2" )
+usethis::use_package( "shinymanager" )
+    
+    
 # ## Add modules ----
 # ## Create a module infrastructure in R/
 # golem::add_module( name = "name_of_module1" ) # Name of the module
@@ -35,7 +51,7 @@ usethis::use_package( "thinkr" )
 # 
 # ## Add internal datasets ----
 # ## If you have data in your package
-# usethis::use_data_raw( name = "my_dataset", open = FALSE ) 
+usethis::use_data_raw( name = "listaArticulos", open = FALSE )
 
 ## Tests ----
 ## Add one line by test you want to create
@@ -49,9 +65,14 @@ devtools::build_vignettes()
 
 ## Code coverage ----
 ## (You'll need GitHub there)
-usethis::use_github()
-usethis::use_travis()
-usethis::use_appveyor()
+### 1. Crear repositorio en GitHub con el mismo nombre de la app, sin incluir README.md
+### 2. En la consola, ejecutar:
+###    git remote add origin https://github.com/maalid/suRgicalBox.git
+###    git branch -M main
+###    git push -u origin main
+# usethis::use_github()
+# usethis::use_travis()
+# usethis::use_appveyor()
 
 # You're now set! ----
 # go to dev/03_deploy.R
