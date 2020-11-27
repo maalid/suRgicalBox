@@ -23,10 +23,17 @@ aplicaciones sin problemas.
 
 ## Instalación
 
-Puede instalar la versión actual de suRgicalBox desde
+Es necesario instalar primero `ffmpeg`. Tienes que descargar la
+compilación estática de [`FFmpeg
+Builds`](http://ffmpeg-static.acyun.org/), descomprimirla, cambiar el
+nombre de la carpeta a `FFmpeg` y pegarla en `C:\`. Finalmente, agregue
+`C:\FFmpeg\bin` al PATH (ver
+[WikiHow](https://es.wikihow.com/instalar-FFmpeg-en-Windows)).
+
+Puede instalar la versión actual de `suRgicalBox` desde
 [GitHub](https://CRAN.R-project.org) usando:
 
-    remotes::install_github("maalid/suRgicalBox")
+    remotes::install_github("maalid/suRgicalBox@main")
 
 ## Código de Conducta
 
