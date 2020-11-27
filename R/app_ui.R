@@ -6,7 +6,7 @@
 #' @noRd
 
 # Global parameters ----
-options(shiny.maxRequestSize = 300*1024^2)
+# options(shiny.maxRequestSize = 300*1024^2)
 
 cameraWidth <- 224
 cameraHeight <- 224
@@ -19,12 +19,13 @@ saturation_low <- 110
 brightness_high  <- 120
 saturation_high <- 120
 
-numeroCaja <- NULL
-productionModel <- NULL
+# numeroCaja <- NULL
+# productionModel <- NULL
 puertos <- NULL
-conn <- NULL
-inventario_df <- NULL
-inventario_parcial <- tibble::tibble()
+# conn <- NULL
+# inventario_df <- NULL
+# inventario_parcial <- tibble::tibble()
+
 
 
 # Funcion showWebcam1 ----
@@ -262,13 +263,13 @@ app_ui <- function(request) {
                                      font-size:40px;
                                      font-family: sans serif;
                                      text-align:center;",
-                               "snapShooteR ",
+                               "suRgicalBox ",
                                
                                span(style = "font-size: 18px;
                                           font-family: sans serif;
                                           color: grey;",
                                     "by AiLab UBB")),
-                           windowTitle = HTML("snapShooteR"),
+                           windowTitle = HTML("suRgicalBox"),
                            id = "navbar",
                            
                            
@@ -363,19 +364,19 @@ app_ui <- function(request) {
                                                                                                  box-shadow: 5px 5px 5px grey;
                                                                                                  border-radius: 5px}")),
                                                                    
-                                                                   div(style = "display: inline-block;
-                                                                                                                                              vertical-align:top;
-                                                                                                                                              width: 75px;",
-                                                                       shinyjs::disabled(actionButton(inputId = "crearInventario",
-                                                                                                      label = "Crear Inventario",
-                                                                                                      size = "lg")),
-                                                                       tags$style("#crearInventario {background-color: black;
-                                                                                                                                                                   font-family: sans serif;
-                                                                                                                                                                   font-size: 15px;
-                                                                                                                                                                   color: white;
-                                                                                                                                                                   box-shadow: 5px 5px 5px grey;
-                                                                                                                                                                   border-radius: 5px}")),
-                                                                   
+                                                                   # div(style = "display: inline-block;
+                                                                   #                                                                            vertical-align:top;
+                                                                   #                                                                            width: 75px;",
+                                                                   #     shinyjs::disabled(actionButton(inputId = "crearInventario",
+                                                                   #                                    label = "Crear Inventario",
+                                                                   #                                    size = "lg")),
+                                                                   #     tags$style("#crearInventario {background-color: black;
+                                                                   #                                                                                                 font-family: sans serif;
+                                                                   #                                                                                                 font-size: 15px;
+                                                                   #                                                                                                 color: white;
+                                                                   #                                                                                                 box-shadow: 5px 5px 5px grey;
+                                                                   #                                                                                                 border-radius: 5px}")),
+                                                                   # 
                                                                    # # Lugar para popup al crear inventario ----
                                                                    # shinyBS::bsModal(id = "",
                                                                    #                  title = "Inventario",
@@ -1251,50 +1252,50 @@ app_ui <- function(request) {
     ) # end tagList
 } # end app_ui
 
-# shinyManager secure_app ----
-app_ui <- shinymanager::secure_app(app_ui,
-                                   status = "default",
-                                   theme = shinythemes::shinytheme("cosmo"),
-                                   tags_top = tags$div(shinyjs::useShinyjs(),
-                                                       shinyjs::extendShinyjs(text = jscode, functions = c("closeWindow")),
-                                                       tags$h2("suRgicalBox ",
-                                                               style = "align:center;
-                                                                        font-family: sans serif;
-                                                                        text-shadow: 5px 5px 5px grey;
-                                                                        font-size:55px;",
-                                                               span(style = "font-size: 18px;
-                                                                          font-family: sans serif;
-                                                                          color: grey;",
-                                                                    "by AiLab UBB")
-                                                       )
-                                   ),
-                                   tags_bottom = tags$div(
-                                     actionButton(inputId = "authStop",
-                                                  label = "",
-                                                  style = "float: right;
-                                                                                border-radius: 5px;
-                                                                                background-color: red;
-                                                                                border-color: transparent;
-                                                                                font-size: 10px",
-                                                  icon = icon("power-off")),
-
-                                     tags$p(
-                                       "Si tienes problemas con la aplicacion, envia un mail al ",
-                                       tags$a(
-                                         href = "mailto:maalid@gmail.com?Subject=suRgicalBox%20Manager",
-                                         target = "_top", "administrador."
-                                       )
-                                     ),
-                                     tags$br(),
-                                     tags$p("AiLab UBB - 2020",
-                                            style = "text-align:center;
-                                                                          font-family: sans serif;
-                                                                          font-weight: bold;
-                                                                          color: grey;
-                                                                          font-size:10px")
-                                   ),
-                                   enable_admin = TRUE,
-                                   background  = "linear-gradient(#000000, #b4b4b4)")
+# # shinyManager secure_app ----
+# app_ui <- shinymanager::secure_app(app_ui,
+#                                    status = "default",
+#                                    theme = shinythemes::shinytheme("cosmo"),
+#                                    tags_top = tags$div(shinyjs::useShinyjs(),
+#                                                        shinyjs::extendShinyjs(text = jscode, functions = c("closeWindow")),
+#                                                        tags$h2("suRgicalBox ",
+#                                                                style = "align:center;
+#                                                                         font-family: sans serif;
+#                                                                         text-shadow: 5px 5px 5px grey;
+#                                                                         font-size:55px;",
+#                                                                span(style = "font-size: 18px;
+#                                                                           font-family: sans serif;
+#                                                                           color: grey;",
+#                                                                     "by AiLab UBB")
+#                                                        )
+#                                    ),
+#                                    tags_bottom = tags$div(
+#                                      actionButton(inputId = "authStop",
+#                                                   label = "",
+#                                                   style = "float: right;
+#                                                                                 border-radius: 5px;
+#                                                                                 background-color: red;
+#                                                                                 border-color: transparent;
+#                                                                                 font-size: 10px",
+#                                                   icon = icon("power-off")),
+# 
+#                                      tags$p(
+#                                        "Si tienes problemas con la aplicacion, envia un mail al ",
+#                                        tags$a(
+#                                          href = "mailto:maalid@gmail.com?Subject=suRgicalBox%20Manager",
+#                                          target = "_top", "administrador."
+#                                        )
+#                                      ),
+#                                      tags$br(),
+#                                      tags$p("AiLab UBB - 2020",
+#                                             style = "text-align:center;
+#                                                                           font-family: sans serif;
+#                                                                           font-weight: bold;
+#                                                                           color: grey;
+#                                                                           font-size:10px")
+#                                    ),
+#                                    enable_admin = TRUE,
+#                                    background  = "linear-gradient(#000000, #b4b4b4)")
 
 #' Add external Resources to the Application
 #' 

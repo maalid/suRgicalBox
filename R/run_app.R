@@ -13,6 +13,6 @@ run_app <- function(
       ui = app_ui, 
       server = app_server
     ), 
-    golem_opts = list(...)
+    golem_opts = list(options(shiny.maxRequestSize = 300*1024^2))
   )
 }

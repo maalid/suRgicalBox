@@ -14,27 +14,27 @@ app_server <- function(input, output, session ) {
     #   py$cam1Settings()
     # })
     
-    ######## shinymanager
-    # shinyManager setLabels
-    shinymanager::set_labels(
-        language = "en",
-        "Please authenticate" = "",
-        "Username:" = "nombre de usuario:",
-        "Password:" = "clave de acceso:"
-    )
-
-    # check_credentials directly on sqlite db
-    res_auth <- shinymanager::secure_server(
-        check_credentials = shinymanager::check_credentials(# credentials
-            db = system.file("app/db/db1.sqlite", package = "suRgicalBox"),
-            # passphrase = key_get("R-shinymanager-key", "obiwankenobi")
-            passphrase = "passphrase"
-        )
-    )
-
-    observe({
-        if (is.null(input$shinymanager_where) || (!is.null(input$shinymanager_where) && input$shinymanager_where %in% "application")) {
-            ######## shinymanager
+    # ######## shinymanager
+    # # shinyManager setLabels
+    # shinymanager::set_labels(
+    #     language = "en",
+    #     "Please authenticate" = "",
+    #     "Username:" = "nombre de usuario:",
+    #     "Password:" = "clave de acceso:"
+    # )
+    # 
+    # # check_credentials directly on sqlite db
+    # res_auth <- shinymanager::secure_server(
+    #     check_credentials = shinymanager::check_credentials(# credentials
+    #         db = system.file("app/db/db1.sqlite", package = "snapShooteR"),
+    #         # passphrase = key_get("R-shinymanager-key", "obiwankenobi")
+    #         passphrase = "passphrase"
+    #     )
+    # )
+    # 
+    # observe({
+    #     if (is.null(input$shinymanager_where) || (!is.null(input$shinymanager_where) && input$shinymanager_where %in% "application")) {
+    #         ######## shinymanager
     
     # 1. WEBCAMS ----
     # CAPTURE WEBCAM1 SETTINGS ----
@@ -220,6 +220,13 @@ app_server <- function(input, output, session ) {
             dir.create(file.path(inventarioFolderPath))
         }
         
+        
+        
+        # puertos <- NULL
+        # conn <- NULL
+        inventario_df <- NULL
+        inventario_parcial <<- tibble::tibble()
+        
         shinyjs::disable(id = "caja")
         shinyjs::disable(id = "CrearCaja")
         # disable(id = "NuevaCaja")
@@ -387,7 +394,7 @@ app_server <- function(input, output, session ) {
     #     utils::str(info)
     #     inventarioVacio <<- DT::editData(data = inventarioVacio, info = info)
     #     DT::replaceData(proxy = proxy5, data = inventarioVacio, resetPaging = FALSE)
-    #     
+    # 
     # })
     # 
     # 
@@ -403,7 +410,7 @@ app_server <- function(input, output, session ) {
     #                           Cantidad_actual = Cantidad - Contador) %>%
     #             dplyr::filter(Instrumento != "ingrese instrumento")
     #         readr::write_csv(inventarioIngresado, file)
-    #         
+    # 
     #     })
     
     # 4. NUEVA CAJA & EXPERIMENTO ----
@@ -2361,28 +2368,34 @@ app_server <- function(input, output, session ) {
     # 20. CERRAR APP ----
     observe({
         if (input$navbar == "Stop") {
-            if (!is.null(conn)) {
-                close(conn)
-            }
+            # if (!is.null(conn)) {
+            #     close(conn)
+            # } else {
+            #     conn <- NULL
+            #     
+            # }
+            # 
+            # close(conn)
+            
             shinyjs::js$closeWindow()
             stopApp()
         }
     })
     
-             ######## shinymanager
-        }
-    })
-
-    observe({
-        # if (!is.null(input$authStop) && input$authStop == 1) {
-        if (req(input$authStop) == 1) {
-            if (!is.null(conn)) {
-                close(conn)
-            }
-            shinyjs::js$closeWindow()
-            stopApp()
-        }
-    })
-    ######## shinymanager
+    #          ######## shinymanager
+    #     }
+    # })
+    # 
+    # observe({
+    #     # if (!is.null(input$authStop) && input$authStop == 1) {
+    #     if (req(input$authStop) == 1) {
+    #         if (!is.null(conn)) {
+    #             close(conn)
+    #         }
+    #         shinyjs::js$closeWindow()
+    #         stopApp()
+    #     }
+    # })
+    # ######## shinymanager
     
 }
