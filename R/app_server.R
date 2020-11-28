@@ -378,6 +378,8 @@ app_server <- function(input, output, session ) {
             shinyjs::enable(id = "etiqueta")
         
             shinyjs::enable(id = "ports")
+            
+            updateSelectizeInput(session, inputId = "etiqueta", choices = values$inventario_df$Instrumento)
         
         } else {
             shinyalert::shinyalert(title = "Falta Inventario", text = "Debe ingresar un inventario antes de continuar", type = "warning")
@@ -393,10 +395,10 @@ app_server <- function(input, output, session ) {
     # CREAR NUEVA CAJA ----
     observeEvent(input$NuevaCaja, {
         
+        shinyjs::enable(id = "WorkingDirectory")
+        
         shinyjs::enable(id = "caja")
         shinyjs::enable(id = "CrearCaja")
-        
-        shinyjs::enable(id = "WorkingDirectory")
         
         shinyjs::disable(id = "chooseInventario")
         
@@ -418,6 +420,7 @@ app_server <- function(input, output, session ) {
         counter(1)
         
         numeroCaja <- input$caja + 1
+        values$inventario_parcial <-  tibble::tibble()
         
         shiny::updateSelectInput(session, inputId = "caja", selected = numeroCaja)
         shinyjs::reset(id = "chooseInventario")
@@ -433,6 +436,8 @@ app_server <- function(input, output, session ) {
     observeEvent(input$NuevoExperimento, {
         
         shinyjs::enable(id = "WorkingDirectory")
+        
+        shinyjs::enable(id = "chooseInventario")
         
         shinyjs::enable(id = "experimento")
         shinyjs::enable(id = "CrearExperimento")
@@ -452,6 +457,7 @@ app_server <- function(input, output, session ) {
         counter(1)
         
         numeroExperimento <- input$experimento + 1
+        values$inventario_parcial <-  tibble::tibble()
         
         shiny::updateSelectInput(session, inputId = "experimento", selected = numeroExperimento)
         shiny::updateSelectInput(session, inputId = "setType", selected = "Train")
@@ -1221,7 +1227,7 @@ app_server <- function(input, output, session ) {
                                                    values$inventario_parcial <- values$inventario_parcial %>% dplyr::bind_rows(y)  # inventario_parcial <<- inventario_parcial %>% dplyr::bind_rows(y)
                                                    
                                                    inventarioActual <- values$inventario_df %>% dplyr::bind_rows(values$inventario_parcial)
-                                                   readr::write_csv(inventarioActual, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Actual_Caja{numeroCaja}.csv"))
+                                                   readr::write_csv(inventarioActual, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Actual_Caja{numeroCaja}_Experimento{numeroExperimento}.csv"))
                                                    
                                                    print(values$inventario_df)
                                                } else {
@@ -1241,7 +1247,7 @@ app_server <- function(input, output, session ) {
                                                    values$inventario_parcial <- values$inventario_parcial %>% dplyr::bind_rows(y)  # inventario_parcial <<- inventario_parcial %>% dplyr::bind_rows(y)
                                                    
                                                    inventarioActual <- values$inventario_df %>% dplyr::bind_rows(values$inventario_parcial)
-                                                   readr::write_csv(inventarioActual, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Actual_Caja{numeroCaja}.csv"))
+                                                   readr::write_csv(inventarioActual, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Actual_Caja{numeroCaja}_Experimento{numeroExperimento}.csv"))
                                                    
                                                    print(values$inventario_df)
                                                }
@@ -1283,7 +1289,7 @@ app_server <- function(input, output, session ) {
                     values$inventario_parcial <- values$inventario_parcial %>% dplyr::bind_rows(x) # inventario_parcial <<- inventario_parcial %>% dplyr::bind_rows(x)
                     
                     inventarioActual <- values$inventario_df %>% dplyr::bind_rows(values$inventario_parcial)
-                    readr::write_csv(inventarioActual, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Actual_Caja{numeroCaja}.csv"))
+                    readr::write_csv(inventarioActual, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Actual_Caja{numeroCaja}_Experimento{numeroExperimento}.csv"))
                     
                     
                 } else {
@@ -1384,7 +1390,7 @@ app_server <- function(input, output, session ) {
                     values$inventario_parcial <- values$inventario_parcial %>% dplyr::bind_rows(x)  # inventario_parcial <<- inventario_parcial %>% dplyr::bind_rows(x)
                     
                     inventarioActual <- values$inventario_df %>% dplyr::bind_rows(values$inventario_parcial)
-                    readr::write_csv(inventarioActual, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Actual_Caja{numeroCaja}.csv"))
+                    readr::write_csv(inventarioActual, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Actual_Caja{numeroCaja}_Experimento{numeroExperimento}.csv"))
                     
                 }
                 
@@ -1937,9 +1943,50 @@ app_server <- function(input, output, session ) {
                                                values$inventario_parcial <- values$inventario_parcial %>% dplyr::bind_rows(y)  # inventario_parcial <<- inventario_parcial %>% dplyr::bind_rows(y)
                                                
                                                inventarioActual <- values$inventario_df %>% dplyr::bind_rows(values$inventario_parcial)  # inventario_parcial
-                                               readr::write_csv(inventarioActual, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Actual_Caja{numeroCaja}.csv"))
+                                               readr::write_csv(inventarioActual, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Actual_Caja{numeroCaja}_Experimento{numeroExperimento}.csv"))
                                                
                                                print(values$inventario_df)
+                                               
+                                               cantidad_actual_k <- values$inventario_df %>%
+                                                   dplyr::filter(Instrumento == x)
+                                               
+                                               cantidad_instrumentos_restantes <- values$inventario_df %>%
+                                                   dplyr::filter(Cantidad_actual >= 0) %>%
+                                                   dplyr::select(Cantidad_actual) %>%
+                                                   sum()
+                                               
+                                               if (cantidad_actual_k$Cantidad_actual >= 0 & cantidad_instrumentos_restantes > 0) {
+                                                   
+                                                   
+                                                   shinyalert::shinyalert("Ponga instrumento en la caja!", type = "success")
+                                                   
+                                                   print(values$inventario_df)
+                                                   
+                                                   
+                                               } else if (cantidad_actual_k$Cantidad_actual < 0) {
+                                                   
+                                                   
+                                                   shinyalert::shinyalert("Instrumento completo en inventario!", type = "error")
+                                                   
+                                                   print(values$inventario_df)
+                                                   
+                                                   
+                                               } else if (cantidad_actual_k$Cantidad_actual == 0 & cantidad_instrumentos_restantes == 0) {
+                                                   
+                                                   
+                                                   shinyalert::shinyalert("Ponga instrumento en la caja!", type = "success")
+                                                   
+                                                   print(values$inventario_df)
+                                                   
+                                                   
+                                                   
+                                                   shinyalert::shinyalert("La caja ha sido completada!", type = "success")
+                                                   
+                                                   print(values$inventario_df)
+                                                   
+                                                   
+                                               }
+                                               
                                            } else {
                                                values$inventario_df <- values$inventario_df   # inventario_df <<- inventario_df
                                                
@@ -1957,9 +2004,11 @@ app_server <- function(input, output, session ) {
                                                values$inventario_parcial <- values$inventario_parcial %>% dplyr::bind_rows(y) # inventario_parcial <<- inventario_parcial %>% dplyr::bind_rows(y)
                                                
                                                inventarioActual <- values$inventario_df %>% dplyr::bind_rows(values$inventario_parcial) # inventario_parcial
-                                               readr::write_csv(inventarioActual, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Actual_Caja{numeroCaja}.csv"))
+                                               readr::write_csv(inventarioActual, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Actual_Caja{numeroCaja}_Experimento{numeroExperimento}.csv"))
                                                
                                                print(values$inventario_df)
+                                               
+                                               shinyalert::shinyalert("Instrumento no pertenece a la caja", type = "error")
                                            }
                                            })
                     senial2 <- "5"
@@ -1998,7 +2047,7 @@ app_server <- function(input, output, session ) {
                     values$inventario_parcial <- values$inventario_parcial %>% dplyr::bind_rows(x)  # inventario_parcial <<- inventario_parcial %>% dplyr::bind_rows(x)
                     
                     inventarioActual <- values$inventario_df %>% dplyr::bind_rows(values$inventario_parcial) # inventario_parcial
-                    readr::write_csv(inventarioActual, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Actual_Caja{numeroCaja}.csv"))
+                    readr::write_csv(inventarioActual, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Actual_Caja{numeroCaja}_Experimento{numeroExperimento}.csv"))
                     
                 }
                 
@@ -2117,7 +2166,7 @@ app_server <- function(input, output, session ) {
                 values$inventario_parcial <- values$inventario_parcial %>% dplyr::bind_rows(x) # inventario_parcial <<- inventario_parcial %>% dplyr::bind_rows(x)
                 
                 inventarioActual <- values$inventario_df %>% dplyr::bind_rows(values$inventario_parcial) # inventario_parcial
-                readr::write_csv(inventarioActual, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Actual_Caja{numeroCaja}.csv"))
+                readr::write_csv(inventarioActual, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Actual_Caja{numeroCaja}_Experimento{numeroExperimento}.csv"))
                 
                 
             }

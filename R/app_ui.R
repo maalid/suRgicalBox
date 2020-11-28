@@ -567,7 +567,7 @@ app_ui <- function(request) {
                                                         
                                                         shinyjs::disabled(shiny::selectizeInput(inputId = "etiqueta",
                                                                                                 label = strong("Ingresar Etiqueta"),
-                                                                                                choices = c("", listaArticulos$objeto),
+                                                                                                choices = c(""),  # listaArticulos$objeto
                                                                                                 width = '80%',
                                                                                                 options = list(placeholder = "--> etiqueta <--",
                                                                                                                create = TRUE)
