@@ -6,8 +6,6 @@
 #' @noRd
 
 # Global parameters ----
-# options(shiny.maxRequestSize = 300*1024^2)
-
 cameraWidth <- 224
 cameraHeight <- 224
 cameraQuality <- 100
@@ -19,54 +17,41 @@ saturation_low <- 110
 brightness_high  <- 120
 saturation_high <- 120
 
-# numeroCaja <- NULL
-# productionModel <- NULL
 puertos <- NULL
-# conn <- NULL
-# inventario_df <- NULL
-# inventario_parcial <- tibble::tibble()
-
-
 
 # Funcion showWebcam1 ----
 showWebcam <- function(cameraWidth, cameraHeight, cameraQuality){
-    paste8 <- function(..., sep = " ", collapse = NULL) {
-        args <- c(
-            lapply(list(...), enc2utf8),
-            list(
-                sep = if (is.null(sep)) sep else enc2utf8(sep),
-                collapse = if (is.null(collapse)) collapse else enc2utf8(collapse)
-            )
-        )
-        do.call(paste, args)
-    }
-    tags$div(
-        tags$script(HTML(paste8(readLines(system.file("app/js/webcam.min.js", package = "suRgicalBox"), warn = FALSE, encoding = "UTF-8"), collapse = "\r\n")))
-        ,
-        HTML(paste0('
-        <div id="my_camera"></div>
 
-        <script language="JavaScript">
-         Webcam.set({
-         width: ',(224/224)*cameraWidth,',
-         height: ',(224/224)*cameraHeight,',
-	     dest_width: ',cameraWidth,',
-	     dest_height: ',cameraHeight,',
-         image_format: \'jpeg\',
-         jpeg_quality: ',cameraQuality,',
-         flip_horiz: true
-         });
-         Webcam.on("init", function () {
-        Webcam.getCameras(function (cameras) {
-          if (cameras.length > 0) {
-            Webcam.setAndInitCamera(cameras[cameras.length - 2].id);
-          }
-        });
-      });
-         Webcam.attach( \'#my_camera\', true);
-         </script>
-         '))
-    )
+    paste8 <- function(..., sep = " ", collapse = NULL) {
+
+        args <- c(lapply(list(...), enc2utf8),
+                  list(sep = if (is.null(sep)) sep else enc2utf8(sep),
+                       collapse = if (is.null(collapse)) collapse else enc2utf8(collapse)))
+
+        do.call(paste, args)
+
+    }
+
+    tags$div(tags$script(HTML(paste8(readLines(system.file("app/js/webcam.min.js", package = "suRgicalBox"), warn = FALSE, encoding = "UTF-8"), collapse = "\r\n"))),
+    HTML(paste0('<div id="my_camera"></div>
+                 <script language="JavaScript">
+                 Webcam.set({width: ',(224/224)*cameraWidth,',
+                             height: ',(224/224)*cameraHeight,',
+	                         dest_width: ',cameraWidth,',
+	                         dest_height: ',cameraHeight,',
+                             image_format: \'jpeg\',
+                             jpeg_quality: ',cameraQuality,',
+                             flip_horiz: true});
+                 Webcam.on("init", function () {
+                                    Webcam.getCameras(function (cameras) {
+                                            if (cameras.length > 0) {
+                                                    Webcam.setAndInitCamera(cameras[cameras.length - 2].id)
+                                                    }
+                                            })
+                           });
+                 Webcam.attach( \'#my_camera\', true);
+                 </script>'))
+            )
 }
 
 # Funcion WebcamOff ----
@@ -364,30 +349,6 @@ app_ui <- function(request) {
                                                                                                  box-shadow: 5px 5px 5px grey;
                                                                                                  border-radius: 5px}")),
                                                                    
-                                                                   # div(style = "display: inline-block;
-                                                                   #                                                                            vertical-align:top;
-                                                                   #                                                                            width: 75px;",
-                                                                   #     shinyjs::disabled(actionButton(inputId = "crearInventario",
-                                                                   #                                    label = "Crear Inventario",
-                                                                   #                                    size = "lg")),
-                                                                   #     tags$style("#crearInventario {background-color: black;
-                                                                   #                                                                                                 font-family: sans serif;
-                                                                   #                                                                                                 font-size: 15px;
-                                                                   #                                                                                                 color: white;
-                                                                   #                                                                                                 box-shadow: 5px 5px 5px grey;
-                                                                   #                                                                                                 border-radius: 5px}")),
-                                                                   # 
-                                                                   # # Lugar para popup al crear inventario ----
-                                                                   # shinyBS::bsModal(id = "",
-                                                                   #                  title = "Inventario",
-                                                                   #                  trigger = "crearInventario",
-                                                                   #                  size = "small",
-                                                                   #                  DT::DTOutput(outputId = 'inventarioCreado'),
-                                                                   #                  # actionButton(inputId = "cargarInventario",
-                                                                   #                  #              label = "Cargar"),
-                                                                   #                  downloadButton(outputId = 'descargarInventario',
-                                                                   #                                 label = 'Download')),
-                                                                   
                                                                    # Campos para el experimento ----
                                                                    div(style = "width: 170px;
                                                                            font: bold 16px 'Helvetica Neue', Helvetica, Arial, sans-serif;",
@@ -428,69 +389,6 @@ app_ui <- function(request) {
                                                                                                  color: white;
                                                                                                  box-shadow: 5px 5px 5px grey;
                                                                                                  border-radius: 5px}")),
-                                                                   
-                                                                   hr(style = "box-shadow: 2px 2px 2px blue;"),
-                                                                   
-                                                                   # # *****Boton para elegir directorio de trabajo ----
-                                                                   #                                           div(style = "width: 250px;
-                                                                   #                                                        font: bold 16px 'Helvetica Neue', Helvetica, Arial, sans-serif;",
-                                                                   #                                               "Escoger Directorio"),
-                                                                   #
-                                                                   #                                           div(style = "display: inline-block;
-                                                                   #                                                        vertical-align:top;
-                                                                   #                                                        width: 170px;",
-                                                                   #                                               shinyFiles::shinyDirButton(id = "directory",
-                                                                   #                                                                          label = "Seleccione Directorio",
-                                                                   #                                                                          title = "Escoja un directorio de trabajo"),
-                                                                   #                                               tags$style("#directory {background-color: black;
-                                                                   #                                                                       font-family: sans serif;
-                                                                   #                                                                       font-size: 15px;
-                                                                   #                                                                       color: white;
-                                                                   #                                                                       box-shadow: 5px 5px 5px grey;
-                                                                   #                                                                       border-radius: 5px}")),
-                                                                   #
-                                                                   #                                             br(),
-                                                                   #
-                                                                   #                                             div(br(style = "line-height: 200px;"),
-                                                                   #
-                                                                   #                                                 align = "center",
-                                                                   #
-                                                                   # # Campo para ingresar numero de experimento ----
-                                                                   #                                                 shinyjs::disabled(shiny::numericInput(inputId = "experimento",
-                                                                   #                                                                                       label = "Experimento No.",
-                                                                   #                                                                                       value = 0,
-                                                                   #                                                                                       min = 0,
-                                                                   #                                                                                       width = "95px")),
-                                                                   #
-                                                                   # # Boton para crear experimento ----
-                                                                   #                                                 shinyjs::disabled(shiny::actionButton(inputId = "CrearExperimento",
-                                                                   #                                                                                       label = "Crear",
-                                                                   #                                                                                       style = "background-color: black;
-                                                                   #                                                                                  font-family: sans serif;
-                                                                   #                                                                                  font-size: 15px;
-                                                                   #                                                                                  color: white;
-                                                                   #                                                                                  box-shadow: 5px 5px 5px grey;
-                                                                   #                                                                                  border-radius: 5px",
-                                                                   #                                                                                  size = "sm")
-                                                                   #                                                 ),
-                                                                   #
-                                                                   #                                                 span(style = "font-size: 13px;
-                                                                   #                                                 color: black;
-                                                                   #                                                 text-shadow: 2px 2px 5px black;",
-                                                                   #                                                 " -- "),
-                                                                   #
-                                                                   # # Boton para crear nuevo experimento ----
-                                                                   #                                                 shinyjs::disabled(shiny::actionButton(inputId = "NuevoExperimento",
-                                                                   #                                                                                       label = "Nuevo",
-                                                                   #                                                                                       style = "background-color: black;
-                                                                   #                                                                                  font-family: sans serif;
-                                                                   #                                                                                  font-size: 15px;
-                                                                   #                                                                                  color: white;
-                                                                   #                                                                                  box-shadow: 5px 5px 5px grey;
-                                                                   #                                                                                  border-radius: 5px",
-                                                                   #                                                                                  size = "sm")
-                                                                   #                                                 )
-                                                                   #                                             ),
                                                                    
                                                                    hr(style = "box-shadow: 2px 2px 2px blue;"),
                                                                    
@@ -592,8 +490,6 @@ app_ui <- function(request) {
                                                                          height = '150px',
                                                                          placeholder = "Escriba aca sus anotaciones"),
                                                 )
-                                                
-                                                
                                                 
                                                ), # end sidebarPanel
                                                
@@ -801,153 +697,6 @@ app_ui <- function(request) {
                                                
                                                sidebarPanel(width = 4,
                                                             
-                                                            # # Boton para elegir directorio de trabajo ----
-                                                            #                                                        div(style = "width: 250px;
-                                                            #                                                                     font: bold 16px 'Helvetica Neue', Helvetica, Arial, sans-serif;",
-                                                            #                                                           "Escoger Directorio"),
-                                                            #
-                                                            #                                                        div(style = "display: inline-block;
-                                                            #                                                                     vertical-align:top;
-                                                            #                                                                     width: 170px;",
-                                                            #                                                           shinyFiles::shinyDirButton(id = "InferenceDirectory",
-                                                            #                                                                                      label = "Seleccione Directorio",
-                                                            #                                                                                      title = "Escoja un directorio de trabajo"),
-                                                            #                                                           tags$style("#InferenceDirectory {background-color: black;
-                                                            #                                                                                            font-family: sans serif;
-                                                            #                                                                                            font-size: 15px;
-                                                            #                                                                                            color: white;
-                                                            #                                                                                            box-shadow: 5px 5px 5px grey;
-                                                            #                                                                                            border-radius: 5px}")),
-                                                            #
-                                                            #                         hr(style = "box-shadow: 2px 2px 2px blue;"),
-                                                            #
-                                                            # # Campos para la caja ----
-                                                            #                         div(style = "width: 170px;
-                                                            #                                                      font: bold 16px 'Helvetica Neue', Helvetica, Arial, sans-serif;",
-                                                            #                             "Caja Numero"),
-                                                            #
-                                                            #                         div(style = "display: inline-block;
-                                                            #                                                      vertical-align:top;
-                                                            #                                                      width: 170px;",
-                                                            #                             shinyjs::disabled(numericInput(inputId = "caja",
-                                                            #                                                   label = NULL,
-                                                            #                                                   value = 0,
-                                                            #                                                   min = 0,
-                                                            #                                                   width = "170px")),
-                                                            #                             tags$style("#caja {border-radius: 5px}")),
-                                                            #
-                                                            #                         div(style = "display: inline-block;
-                                                            #                                                      vertical-align:top;
-                                                            #                                                      width: 75px;",
-                                                            #                             shinyjs::disabled(actionButton(inputId = "CrearCaja",
-                                                            #                                                   label = "Crear",
-                                                            #                                                   size = "lg")),
-                                                            #                             tags$style("#CrearCaja {background-color: black;
-                                                            #                                                                     font-family: sans serif;
-                                                            #                                                                     font-size: 15px;
-                                                            #                                                                     color: white;
-                                                            #                                                                     box-shadow: 5px 5px 5px grey;
-                                                            #                                                                     border-radius: 5px}")),
-                                                            #
-                                                            #                         div(style = "display: inline-block;
-                                                            #                                                      vertical-align:top;
-                                                            #                                                      width: 75px;",
-                                                            #                             shinyjs::disabled(actionButton(inputId = "NuevaCaja",
-                                                            #                                                   label = "Nueva",
-                                                            #                                                   size = "lg")),
-                                                            #                             tags$style("#NuevaCaja {background-color: black;
-                                                            #                                                                     font-family: sans serif;
-                                                            #                                                                     font-size: 15px;
-                                                            #                                                                     color: white;
-                                                            #                                                                     box-shadow: 5px 5px 5px grey;
-                                                            #                                                                     border-radius: 5px}")),
-                                                            #
-                                                            #                         br(),
-                                                            #
-                                                            # # Capos para inventario ----
-                                                            #                         div(style = "width: 170px;
-                                                            #                                                      font: bold 16px 'Helvetica Neue', Helvetica, Arial, sans-serif;",
-                                                            #                             "Escoger Inventario"),
-                                                            #
-                                                            #                         div(style = "display: inline-block;
-                                                            #                                                      vertical-align:top;
-                                                            #                                                      width: 330px;",
-                                                            #                             shinyjs::disabled(fileInput(inputId = "chooseInventario",
-                                                            #                                                label = NULL,
-                                                            #                                                accept = c(".csv"),
-                                                            #                                                width = "330px",
-                                                            #                                                buttonLabel = ".csv",
-                                                            #                                                placeholder = "Seleccionar archivo")),
-                                                            #                             tags$style("#chooseInventario {background-color: black;
-                                                            #                                                                            font-family: sans serif;
-                                                            #                                                                            font-size: 15px;
-                                                            #                                                                            color: white;
-                                                            #                                                                            box-shadow: 5px 5px 5px grey;
-                                                            #                                                                            border-radius: 5px}")),
-                                                            #
-                                                            #                         # div(style = "width: 170px;
-                                                            #                         #              font: bold 16px 'Helvetica Neue', Helvetica, Arial, sans-serif;",
-                                                            #                         #             "Crear inventario"),
-                                                            #                         #
-                                                            #                         div(style = "display: inline-block;
-                                                            #                                                      vertical-align:top;
-                                                            #                                                      width: 75px;",
-                                                            #                             shinyjs::disabled(actionButton(inputId = "crearInventario",
-                                                            #                                                   label = "Crear Inventario",
-                                                            #                                                   size = "lg")),
-                                                            #                             tags$style("#crearInventario {background-color: black;
-                                                            #                                                                           font-family: sans serif;
-                                                            #                                                                           font-size: 15px;
-                                                            #                                                                           color: white;
-                                                            #                                                                           box-shadow: 5px 5px 5px grey;
-                                                            #                                                                           border-radius: 5px}")),
-                                                            #
-                                                            #                         # br(),
-                                                            #                         # br(),
-                                                            #
-                                                            # # Campos para el experimento ----
-                                                            #                         div(style = "width: 170px;
-                                                            #                                                      font: bold 16px 'Helvetica Neue', Helvetica, Arial, sans-serif;",
-                                                            #                             "Experimento Numero"),
-                                                            #
-                                                            #                         div(style = "display: inline-block;
-                                                            #                                                      vertical-align:top;
-                                                            #                                                      width: 170px;",
-                                                            #                             shinyjs::disabled(numericInput(inputId = "experimento",
-                                                            #                                                   label = NULL,
-                                                            #                                                   value = 0,
-                                                            #                                                   min = 0,
-                                                            #                                                   width = "170px")),
-                                                            #                             tags$style("#experimento {border-radius: 5px}")),
-                                                            #
-                                                            #                         div(style = "display: inline-block;
-                                                            #                                                      vertical-align:top;
-                                                            #                                                      width: 75px;",
-                                                            #                             shinyjs::disabled(actionButton(inputId = "CrearExperimento",
-                                                            #                                                   label = "Crear",
-                                                            #                                                   size = "lg")),
-                                                            #                             tags$style("#CrearExperimento {background-color: black;
-                                                            #                                                                            font-family: sans serif;
-                                                            #                                                                            font-size: 15px;
-                                                            #                                                                            color: white;
-                                                            #                                                                            box-shadow: 5px 5px 5px grey;
-                                                            #                                                                            border-radius: 5px}")),
-                                                            #
-                                                            #                         div(style = "display: inline-block;
-                                                            #                                                      vertical-align:top;
-                                                            #                                                      width: 75px;",
-                                                            #                             shinyjs::disabled(actionButton(inputId = "NuevoExperimento",
-                                                            #                                                   label = "Nuevo",
-                                                            #                                                   size = "lg")),
-                                                            #                             tags$style("#NuevoExperimento {background-color: black;
-                                                            #                                                                            font-family: sans serif;
-                                                            #                                                                            font-size: 15px;
-                                                            #                                                                            color: white;
-                                                            #                                                                            box-shadow: 5px 5px 5px grey;
-                                                            #                                                                            border-radius: 5px}")),
-                                                            #
-                                                            #                         hr(style = "box-shadow: 2px 2px 2px blue;"),
-                                                            #
                                                             # Coneccion con arduino ----
                                                             div(style = "width: 170px;
                                                      font: bold 16px 'Helvetica Neue', Helvetica, Arial, sans-serif;",
@@ -1148,31 +897,6 @@ app_ui <- function(request) {
                                                                               onclick = "takeInferenceSnapshot()")))
                                                     
                                                           ), # End box de imagen, contador y boton de snapshoot
-                                                    
-                                                    
-                                                    
-                                                    # # Lugar para popup al crear inventario ----
-                                                    # shinyBS::bsModal(id = "inventarioPopup",
-                                                    #         title = "Inventario",
-                                                    #         trigger = "crearInventario",
-                                                    #         size = "large",
-                                                    #         DT::DTOutput(outputId = 'inventarioCreado'),
-                                                    #         # actionButton(inputId = "cargarInventario",
-                                                    #         #              label = "Cargar"),
-                                                    #         downloadButton(outputId = 'descargarInventario',
-                                                    #                        label = 'Download')),
-                                                    
-                                                    # # Lugar para popup al actualizar manuelamente inventario ----
-                                                    #                                         bsModal(id = "inventarioActualizadoManualmentePopup",
-                                                    #                                                 title = "Inventario Actual",
-                                                    #                                                 trigger = "alertaAmarillo",
-                                                    #                                                 size = "large",
-                                                    #                                                 DTOutput(outputId = 'inventarioActualizadoManualmente')
-                                                    #                                                 # actionButton(inputId = "cargarInventario",
-                                                    #                                                 #              label = "Cargar"),
-                                                    #                                                 # downloadButton(outputId = 'descargarInventario',
-                                                    #                                                 #                 label = 'Download')
-                                                    #                                                 ),
                                                     
                                                     br(),
                                                     br(),

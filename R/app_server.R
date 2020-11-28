@@ -7,12 +7,15 @@
 #' @importFrom keras "%<-%"
 #' @noRd
 app_server <- function(input, output, session ) {
-    # observeEvent(input$cam0Settings, {
-    #   py$cam0Settings()
-    # })
-    # observeEvent(input$cam1Settings, {
-    #   py$cam1Settings()
-    # })
+    
+    values <- reactiveValues(
+        
+        # numeroCaja =  NULL,
+        inventario_df = NULL,
+        inventario_parcial = tibble::tibble(),
+        conn = NULL,
+        productionModel = NULL
+    )
     
     # ######## shinymanager
     # # shinyManager setLabels
@@ -201,13 +204,13 @@ app_server <- function(input, output, session ) {
     # Observe CrearCaja ----
     observeEvent(input$CrearCaja, {
         
-        # disable(id = "WorkingDirectory")
+        shinyjs::disable(id = "WorkingDirectory")
         
-        shinyjs::enable(id = "NuevaCaja")
+        # shinyjs::enable(id = "NuevaCaja")
         
         workingFolderName <- shinyFiles::parseDirPath(volumes, input$WorkingDirectory)
         
-        numeroCaja <<- input$caja
+        numeroCaja <- input$caja # numeroCaja <<- input$caja
         cajaFolderPath <- glue::glue("{workingFolderName}/Caja{numeroCaja}")
         
         inventarioFolderPath <- glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario")
@@ -224,15 +227,15 @@ app_server <- function(input, output, session ) {
         
         # puertos <- NULL
         # conn <- NULL
-        inventario_df <- NULL
-        inventario_parcial <<- tibble::tibble()
+        # inventario_df <- NULL
+        # inventario_parcial <<- tibble::tibble()
         
         shinyjs::disable(id = "caja")
         shinyjs::disable(id = "CrearCaja")
-        # disable(id = "NuevaCaja")
+        shinyjs::enable(id = "NuevaCaja")
         
         shinyjs::enable(id = "chooseInventario")
-        shinyjs::enable(id = "crearInventario")
+        # shinyjs::enable(id = "crearInventario")
         
         shinyjs::enable(id = "experimento")
         shinyjs::enable(id = "CrearExperimento")
@@ -242,12 +245,12 @@ app_server <- function(input, output, session ) {
     # Observe CrearExperimento ----
     observeEvent(input$CrearExperimento, {
         
-        shinyjs::enable(id = "NuevoExperimento")
-        shinyjs::enable(id = "setType")
-        
-        shinyjs::enable(id = "saveAnnotations")
-        
-        shinyjs::enable(id = "etiqueta")
+        # shinyjs::enable(id = "NuevoExperimento")
+        # shinyjs::enable(id = "setType")
+        # 
+        # shinyjs::enable(id = "saveAnnotations")
+        # 
+        # shinyjs::enable(id = "etiqueta")
         
         workingFolderName <- shinyFiles::parseDirPath(volumes, input$WorkingDirectory)
         
@@ -343,79 +346,88 @@ app_server <- function(input, output, session ) {
             dir.create(file.path(resultadosInferenciaFolderPath))
         }
         
-        if (!is.null(input$chooseInventario)) {
-            inFileInventario <- input$chooseInventario
+        inFileInventario <- input$chooseInventario
+        if (!is.null(inFileInventario)) { #input$chooseInventario
+            
+            # inFileInventario <- input$chooseInventario
             print(input$chooseInventario$name)
             
-            inventario_df <<- readr::read_csv(file = inFileInventario$datapath)
+            values$inventario_df <- readr::read_csv(file = inFileInventario$datapath) # inventario_df <<- readr::read_csv(file = inFileInventario$datapath)
             
             if (!file.exists(input$chooseInventario$name)) {
-                readr::write_csv(inventario_df, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Caja{numeroCaja}.csv"))
+                readr::write_csv(values$inventario_df, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Caja{numeroCaja}.csv"))
             }
             
-            print(inventario_df)
+            print(values$inventario_df)
+            # shinyjs::disable(id = "WorkingDirectory")
+        
+            shinyjs::enable(id = "NuevoExperimento")
             
+            shinyjs::disable(id = "caja")
+            shinyjs::disable(id = "CrearCaja")
+            
+            shinyjs::disable(id = "chooseInventario")
+        
+            shinyjs::disable(id = "experimento")
+            shinyjs::disable(id = "CrearExperimento")
+            
+            shinyjs::enable(id = "setType")
+            
+            shinyjs::enable(id = "saveAnnotations")
+            
+            shinyjs::enable(id = "etiqueta")
+        
+            shinyjs::enable(id = "ports")
+        
         } else {
-            inventario_df <<- readr::read_csv(file = glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Caja{numeroCaja}.csv"))
+            shinyalert::shinyalert(title = "Falta Inventario", text = "Debe ingresar un inventario antes de continuar", type = "warning")
+            # inventario_df <<- readr::read_csv(file = glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Caja{numeroCaja}.csv"))
         }
         
-        print(inventario_df)
+        # print(inventario_df)
         
-        # shinyjs::disable(id = "WorkingDirectory")
+        
+    })
+    
+    # 4. NUEVA CAJA & EXPERIMENTO ----
+    # CREAR NUEVA CAJA ----
+    observeEvent(input$NuevaCaja, {
+        
+        shinyjs::enable(id = "caja")
+        shinyjs::enable(id = "CrearCaja")
+        
+        shinyjs::enable(id = "WorkingDirectory")
+        
+        shinyjs::disable(id = "chooseInventario")
         
         shinyjs::disable(id = "experimento")
         shinyjs::disable(id = "CrearExperimento")
         
-        shinyjs::enable(id = "ports")
+        shinyjs::disable(id = "NuevoExperimento")
+        shinyjs::disable(id = "setType")
+        
+        shinyjs::disable(id = "saveAnnotations")
+        
+        shinyjs::disable(id = "BurstSnapshot")
+        shinyjs::disable(id = "stop_BurstSnapshot")
+        shinyjs::disable(id = "snapshot")
+        
+        shinyjs::disable(id = "etiqueta")
+        
+        # Resetear contador
+        counter(1)
+        
+        numeroCaja <- input$caja + 1
+        
+        shiny::updateSelectInput(session, inputId = "caja", selected = numeroCaja)
+        shinyjs::reset(id = "chooseInventario")
+        # restoreInput(id = "chooseInventario", default = NULL)
+        shiny::updateSelectInput(session, inputId = "experimento", selected = 1)
+        shiny::updateSelectInput(session, inputId = "setType", selected = "Train")
+        shiny::updateSelectInput(session, inputId = "etiqueta", selected = "--> etiqueta <--")
+        shiny::updateTextAreaInput(session, inputId = "annotations", label = "Anotaciones", value = "", placeholder = "Escriba aca sus anotaciones")
+        
     })
-    
-    # # 3. INVENTARIO ----
-    # # CREAR INVENTARIO MANUALMENTE ----
-    # inventarioVacio <- tibble::tibble(Instrumento = rep_len("ingrese instrumento", 100),
-    #                                   Cantidad = rep_len(0, 100))
-    # # observeEvent(input$crearInventario, {
-    # 
-    # 
-    # # options(DT.options = list(pageLength = 5))
-    # 
-    # output$inventarioCreado <- DT::renderDT(expr = inventarioVacio,
-    #                                         selection = 'none',
-    #                                         server = FALSE,
-    #                                         editable = 'cell')
-    # 
-    # 
-    # 
-    # # })
-    # 
-    # proxy5 = DT::dataTableProxy(outputId = 'inventarioCreado')
-    # 
-    # observeEvent(input$inventarioCreado_cell_edit, {
-    #     info = input$inventarioCreado_cell_edit
-    #     utils::str(info)
-    #     inventarioVacio <<- DT::editData(data = inventarioVacio, info = info)
-    #     DT::replaceData(proxy = proxy5, data = inventarioVacio, resetPaging = FALSE)
-    # 
-    # })
-    # 
-    # 
-    # # observeEvent(input$cargarInventario, {
-    # #     print(inventarioVacio)
-    # # })
-    # 
-    # output$descargarInventario <- downloadHandler(
-    #     filename = glue::glue("Inventario_Caja{numeroCaja}.csv"),
-    #     content = function(file) {
-    #         inventarioIngresado <- inventarioVacio %>%
-    #             dplyr::mutate(Contador = rep_len(0, nrow(inventarioVacio)),
-    #                           Cantidad_actual = Cantidad - Contador) %>%
-    #             dplyr::filter(Instrumento != "ingrese instrumento")
-    #         readr::write_csv(inventarioIngresado, file)
-    # 
-    #     })
-    
-    # 4. NUEVA CAJA & EXPERIMENTO ----
-    # CREAR NUEVA CAJA ----
-    
     
     # CREAR NUEVO EXPERIMENTO ----
     observeEvent(input$NuevoExperimento, {
@@ -780,11 +792,11 @@ app_server <- function(input, output, session ) {
         
         com <- input$COM
         
-        conn <<- serial::serialConnection("arduino",
+        values$conn <- serial::serialConnection("arduino",
                                           port = glue::glue("{com}"),
                                           mode = "9600,n,8,1")
         
-        open(conn)
+        open(values$conn)
         
         # output$connectionStatus <- shiny::renderPrint({summary(conn)})
         
@@ -858,9 +870,9 @@ app_server <- function(input, output, session ) {
             model
         }
         
-        productionModel <<- create_production_model()
+        values$productionModel <- create_production_model()  # productionModel <<- create_production_model()
         
-        productionModel %>% keras::load_model_weights_hdf5(filepath = inFileProductionModel$datapath,
+        values$productionModel %>% keras::load_model_weights_hdf5(filepath = inFileProductionModel$datapath,
                                                            # by_name = TRUE
         )
         
@@ -899,7 +911,7 @@ app_server <- function(input, output, session ) {
             shinyjs::disable(id = "inferenceSnapshot")
             
             # !Completitud caja: NO, SI ----
-            if (any(inventario_df$Cantidad_actual > 0) == FALSE) {
+            if (any(values$inventario_df$Cantidad_actual > 0) == FALSE) {
                 
                 # NO: Caja completa, detener ----
                 senial <- "1"
@@ -909,7 +921,7 @@ app_server <- function(input, output, session ) {
                 msg2 <- "-"
                 print(senial)
                 print(class(senial))
-                print(inventario_df)
+                print(values$inventario_df)
                 print(msg)
                 print(msg2)
                 
@@ -1029,7 +1041,7 @@ app_server <- function(input, output, session ) {
                             reticulate::array_reshape(c(1, imageWidth, imageHeight, 3))
                         imgInputRight <- imgInputRight/255
                         
-                        dissTemp[j,] <- productionModel %>% keras::predict_on_batch(list(imgInputLeft, imgInputRight))
+                        dissTemp[j,] <- values$productionModel %>% keras::predict_on_batch(list(imgInputLeft, imgInputRight))
                         print(dissTemp[j,])
                         
                         imageLeftTemp[j,] <- gsub(".*/|_Raw.*", "", img_left)
@@ -1187,9 +1199,9 @@ app_server <- function(input, output, session ) {
                                                type = "input",
                                                inputType = "text",
                                                inputPlaceholder = "ingrese instrumento",
-                                               callbackR = function(x) { instrumentos <- inventario_df$Instrumento
+                                               callbackR = function(x) { instrumentos <- values$inventario_df$Instrumento
                                                if (x %in% instrumentos) {
-                                                   inventario_df <<- inventario_df %>%
+                                                   values$inventario_df <- values$inventario_df %>%  # inventario_df <<- inventario_df %>%
                                                        dplyr::mutate(Contador = dplyr::case_when(Instrumento == x ~ Contador + 1,
                                                                                                  TRUE ~ Contador),
                                                                      Cantidad_actual = dplyr::case_when(Instrumento == x ~ Cantidad - Contador,
@@ -1206,14 +1218,14 @@ app_server <- function(input, output, session ) {
                                                                        Signal2 = senial2,
                                                                        Accion2 = msg2)
                                                    
-                                                   inventario_parcial <<- inventario_parcial %>% dplyr::bind_rows(y)
+                                                   values$inventario_parcial <- values$inventario_parcial %>% dplyr::bind_rows(y)  # inventario_parcial <<- inventario_parcial %>% dplyr::bind_rows(y)
                                                    
-                                                   inventarioActual <- inventario_df %>% dplyr::bind_rows(inventario_parcial)
+                                                   inventarioActual <- values$inventario_df %>% dplyr::bind_rows(values$inventario_parcial)
                                                    readr::write_csv(inventarioActual, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Actual_Caja{numeroCaja}.csv"))
                                                    
-                                                   print(inventario_df)
+                                                   print(values$inventario_df)
                                                } else {
-                                                   inventario_df <<- inventario_df
+                                                   values$inventario_df <- values$inventario_df # inventario_df <<- inventario_df
                                                    
                                                    y <- tibble::tibble(Instrumento = inferencePrediction$clase_predicha,
                                                                        Cantidad = NA,
@@ -1226,19 +1238,19 @@ app_server <- function(input, output, session ) {
                                                                        Signal2 = senial2,
                                                                        Accion2 = msg2)
                                                    
-                                                   inventario_parcial <<- inventario_parcial %>% dplyr::bind_rows(y)
+                                                   values$inventario_parcial <- values$inventario_parcial %>% dplyr::bind_rows(y)  # inventario_parcial <<- inventario_parcial %>% dplyr::bind_rows(y)
                                                    
-                                                   inventarioActual <- inventario_df %>% dplyr::bind_rows(inventario_parcial)
+                                                   inventarioActual <- values$inventario_df %>% dplyr::bind_rows(values$inventario_parcial)
                                                    readr::write_csv(inventarioActual, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Actual_Caja{numeroCaja}.csv"))
                                                    
-                                                   print(inventario_df)
+                                                   print(values$inventario_df)
                                                }
                                                })
                         senial2 <- "5"
                         msg2 <- "-"
                         print(senial)
                         print(class(senial))
-                        print(inventario_df)
+                        print(values$inventario_df)
                         print(msg)
                         print(msg2)
                         
@@ -1252,7 +1264,7 @@ app_server <- function(input, output, session ) {
                         msg2 <- "-"
                         print(senial)
                         print(class(senial))
-                        print(inventario_df)
+                        print(values$inventario_df)
                         print(msg)
                         print(msg2)
                         
@@ -1268,9 +1280,9 @@ app_server <- function(input, output, session ) {
                                         Signal2 = senial2,
                                         Accion2 = msg2)
                     
-                    inventario_parcial <<- inventario_parcial %>% dplyr::bind_rows(x)
+                    values$inventario_parcial <- values$inventario_parcial %>% dplyr::bind_rows(x) # inventario_parcial <<- inventario_parcial %>% dplyr::bind_rows(x)
                     
-                    inventarioActual <- inventario_df %>% dplyr::bind_rows(inventario_parcial)
+                    inventarioActual <- values$inventario_df %>% dplyr::bind_rows(values$inventario_parcial)
                     readr::write_csv(inventarioActual, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Actual_Caja{numeroCaja}.csv"))
                     
                     
@@ -1278,7 +1290,7 @@ app_server <- function(input, output, session ) {
                     
                     # SI: Pertenencia al inventario: NO, SI ----
                     clase_predicha <- inferencePrediction$clase_predicha
-                    instrumentos <- inventario_df$Instrumento
+                    instrumentos <- values$inventario_df$Instrumento
                     
                     # NO: Objeto no esta en inventario ----
                     if (!(clase_predicha %in% instrumentos)) {
@@ -1290,24 +1302,24 @@ app_server <- function(input, output, session ) {
                         msg2 <- "-"
                         print(senial)
                         print(class(senial))
-                        print(inventario_df)
+                        print(values$inventario_df)
                         print(msg)
                         print(msg2)
                         
                     } else {
                         
                         # SI: !Completitud inventario: NO, SI ----
-                        inventario_df <<- inventario_df %>%
+                        values$inventario_df <- values$inventario_df %>%  # inventario_df <<- inventario_df %>%
                             dplyr::mutate(Contador = dplyr::case_when(Instrumento == clase_predicha ~ Contador + 1,
                                                                       TRUE ~ Contador),
                                           Cantidad_actual = dplyr::case_when(Instrumento == clase_predicha ~ Cantidad - Contador,
                                                                              TRUE ~ Cantidad_actual))
-                        print(inventario_df)
+                        print(values$inventario_df)
                         
-                        cantidad_actual_k <- inventario_df %>%
+                        cantidad_actual_k <- values$inventario_df %>%
                             dplyr::filter(Instrumento == clase_predicha)
                         
-                        cantidad_instrumentos_restantes <- inventario_df %>%
+                        cantidad_instrumentos_restantes <- values$inventario_df %>%
                             dplyr::filter(Cantidad_actual >= 0) %>%
                             dplyr::select(Cantidad_actual) %>%
                             sum()
@@ -1321,7 +1333,7 @@ app_server <- function(input, output, session ) {
                             msg2 <- "-"
                             print(senial)
                             print(class(senial))
-                            print(inventario_df)
+                            print(values$inventario_df)
                             print(msg)
                             print(msg2)
                             
@@ -1334,7 +1346,7 @@ app_server <- function(input, output, session ) {
                             msg2 <- "-"
                             print(senial)
                             print(class(senial))
-                            print(inventario_df)
+                            print(values$inventario_df)
                             print(msg)
                             print(msg2)
                             
@@ -1345,7 +1357,7 @@ app_server <- function(input, output, session ) {
                             shinyalert::shinyalert("Ponga instrumento en la caja!", type = "success")
                             print(senial)
                             print(class(senial))
-                            print(inventario_df)
+                            print(values$inventario_df)
                             print(msg)
                             
                             senial2 <- "4"
@@ -1353,7 +1365,7 @@ app_server <- function(input, output, session ) {
                             shinyalert::shinyalert("La caja ha sido completada!", type = "success")
                             print(senial2)
                             print(class(senial2))
-                            print(inventario_df)
+                            print(values$inventario_df)
                             print(msg2)
                             
                         }
@@ -1369,18 +1381,18 @@ app_server <- function(input, output, session ) {
                                         Signal2 = senial2,
                                         Accion2 = msg2)
                     
-                    inventario_parcial <<- inventario_parcial %>% dplyr::bind_rows(x)
+                    values$inventario_parcial <- values$inventario_parcial %>% dplyr::bind_rows(x)  # inventario_parcial <<- inventario_parcial %>% dplyr::bind_rows(x)
                     
-                    inventarioActual <- inventario_df %>% dplyr::bind_rows(inventario_parcial)
+                    inventarioActual <- values$inventario_df %>% dplyr::bind_rows(values$inventario_parcial)
                     readr::write_csv(inventarioActual, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Actual_Caja{numeroCaja}.csv"))
                     
                 }
                 
             } # End if !Completitud caja
             
-            serial::write.serialConnection(conn, senial)
+            serial::write.serialConnection(values$conn, senial)
             Sys.sleep(2)
-            serial::write.serialConnection(conn, senial2)
+            serial::write.serialConnection(values$conn, senial2)
             
             shinyjs::enable(id = "NuevoExperimento")
             
@@ -1596,7 +1608,7 @@ app_server <- function(input, output, session ) {
         
         
         # !Completitud caja: NO, SI ----
-        if (any(inventario_df$Cantidad_actual > 0) == FALSE) {
+        if (any(values$inventario_df$Cantidad_actual > 0) == FALSE) {
             
             # NO: Caja completa, detener ----
             senial <- "1"
@@ -1606,7 +1618,7 @@ app_server <- function(input, output, session ) {
             msg2 <- "-"
             print(senial)
             print(class(senial))
-            print(inventario_df)
+            print(values$inventario_df)
             print(msg)
             print(msg2)
             
@@ -1717,7 +1729,7 @@ app_server <- function(input, output, session ) {
                         reticulate::array_reshape(c(1, imageWidth, imageHeight, 3))
                     imgInputRight <- imgInputRight/255
                     
-                    dissTemp[j,] <- productionModel %>% keras::predict_on_batch(list(imgInputLeft, imgInputRight))
+                    dissTemp[j,] <- values$productionModel %>% keras::predict_on_batch(list(imgInputLeft, imgInputRight))
                     print(dissTemp[j,])
                     
                     imageLeftTemp[j,] <- gsub(".*/|_Raw.*", "", img_left)
@@ -1903,9 +1915,9 @@ app_server <- function(input, output, session ) {
                                            type = "input",
                                            inputType = "text",
                                            inputPlaceholder = "ingrese instrumento",
-                                           callbackR = function(x) { instrumentos <- inventario_df$Instrumento
+                                           callbackR = function(x) { instrumentos <- values$inventario_df$Instrumento
                                            if (x %in% instrumentos) {
-                                               inventario_df <<- inventario_df %>%
+                                               values$inventario_df <- values$inventario_df %>%  # inventario_df <<- inventario_df %>%
                                                    dplyr::mutate(Contador = dplyr::case_when(Instrumento == x ~ Contador + 1,
                                                                                              TRUE ~ Contador),
                                                                  Cantidad_actual = dplyr::case_when(Instrumento == x ~ Cantidad - Contador,
@@ -1922,14 +1934,14 @@ app_server <- function(input, output, session ) {
                                                                    Signal2 = senial2,
                                                                    Accion2 = msg2)
                                                
-                                               inventario_parcial <<- inventario_parcial %>% dplyr::bind_rows(y)
+                                               values$inventario_parcial <- values$inventario_parcial %>% dplyr::bind_rows(y)  # inventario_parcial <<- inventario_parcial %>% dplyr::bind_rows(y)
                                                
-                                               inventarioActual <- inventario_df %>% dplyr::bind_rows(inventario_parcial)
+                                               inventarioActual <- values$inventario_df %>% dplyr::bind_rows(values$inventario_parcial)  # inventario_parcial
                                                readr::write_csv(inventarioActual, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Actual_Caja{numeroCaja}.csv"))
                                                
-                                               print(inventario_df)
+                                               print(values$inventario_df)
                                            } else {
-                                               inventario_df <<- inventario_df
+                                               values$inventario_df <- values$inventario_df   # inventario_df <<- inventario_df
                                                
                                                y <- tibble::tibble(Instrumento = inferencePrediction$clase_predicha,
                                                                    Cantidad = NA,
@@ -1942,19 +1954,19 @@ app_server <- function(input, output, session ) {
                                                                    Signal2 = senial2,
                                                                    Accion2 = msg2)
                                                
-                                               inventario_parcial <<- inventario_parcial %>% dplyr::bind_rows(y)
+                                               values$inventario_parcial <- values$inventario_parcial %>% dplyr::bind_rows(y) # inventario_parcial <<- inventario_parcial %>% dplyr::bind_rows(y)
                                                
-                                               inventarioActual <- inventario_df %>% dplyr::bind_rows(inventario_parcial)
+                                               inventarioActual <- values$inventario_df %>% dplyr::bind_rows(values$inventario_parcial) # inventario_parcial
                                                readr::write_csv(inventarioActual, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Actual_Caja{numeroCaja}.csv"))
                                                
-                                               print(inventario_df)
+                                               print(values$inventario_df)
                                            }
                                            })
                     senial2 <- "5"
                     msg2 <- "-"
                     print(senial)
                     print(class(senial))
-                    print(inventario_df)
+                    print(values$inventario_df)
                     print(msg)
                     print(msg2)
                     
@@ -1968,7 +1980,7 @@ app_server <- function(input, output, session ) {
                     msg2 <- "-"
                     print(senial)
                     print(class(senial))
-                    print(inventario_df)
+                    print(values$inventario_df)
                     print(msg)
                     print(msg2)
                     
@@ -1983,9 +1995,9 @@ app_server <- function(input, output, session ) {
                                         Signal2 = senial2,
                                         Accion2 = msg2)
                     
-                    inventario_parcial <<- inventario_parcial %>% dplyr::bind_rows(x)
+                    values$inventario_parcial <- values$inventario_parcial %>% dplyr::bind_rows(x)  # inventario_parcial <<- inventario_parcial %>% dplyr::bind_rows(x)
                     
-                    inventarioActual <- inventario_df %>% dplyr::bind_rows(inventario_parcial)
+                    inventarioActual <- values$inventario_df %>% dplyr::bind_rows(values$inventario_parcial) # inventario_parcial
                     readr::write_csv(inventarioActual, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Actual_Caja{numeroCaja}.csv"))
                     
                 }
@@ -2010,7 +2022,7 @@ app_server <- function(input, output, session ) {
                 
                 # SI: Pertenencia al inventario: NO, SI ----
                 clase_predicha <- inferencePrediction$clase_predicha
-                instrumentos <- inventario_df$Instrumento
+                instrumentos <- values$inventario_df$Instrumento
                 
                 # NO: Objeto no esta en inventario ----
                 if (!(clase_predicha %in% instrumentos)) {
@@ -2022,24 +2034,24 @@ app_server <- function(input, output, session ) {
                     msg2 <- "-"
                     print(senial)
                     print(class(senial))
-                    print(inventario_df)
+                    print(values$inventario_df)
                     print(msg)
                     print(msg2)
                     
                 } else {
                     
                     # SI: !Completitud inventario: NO, SI ----
-                    inventario_df <<- inventario_df %>%
+                    values$inventario_df <- values$inventario_df %>%  # inventario_df <<- inventario_df %>%
                         dplyr::mutate(Contador = dplyr::case_when(Instrumento == clase_predicha ~ Contador + 1,
                                                                   TRUE ~ Contador),
                                       Cantidad_actual = dplyr::case_when(Instrumento == clase_predicha ~ Cantidad - Contador,
                                                                          TRUE ~ Cantidad_actual))
-                    print(inventario_df)
+                    print(values$inventario_df)
                     
-                    cantidad_actual_k <- inventario_df %>%
+                    cantidad_actual_k <- values$inventario_df %>%
                         dplyr::filter(Instrumento == clase_predicha)
                     
-                    cantidad_instrumentos_restantes <- inventario_df %>%
+                    cantidad_instrumentos_restantes <- values$inventario_df %>%
                         dplyr::filter(Cantidad_actual >= 0) %>%
                         dplyr::select(Cantidad_actual) %>%
                         sum()
@@ -2053,7 +2065,7 @@ app_server <- function(input, output, session ) {
                         msg2 <- "-"
                         print(senial)
                         print(class(senial))
-                        print(inventario_df)
+                        print(values$inventario_df)
                         print(msg)
                         print(msg2)
                         
@@ -2066,7 +2078,7 @@ app_server <- function(input, output, session ) {
                         msg2 <- "-"
                         print(senial)
                         print(class(senial))
-                        print(inventario_df)
+                        print(values$inventario_df)
                         print(msg)
                         print(msg2)
                         
@@ -2077,7 +2089,7 @@ app_server <- function(input, output, session ) {
                         shinyalert::shinyalert("Ponga instrumento en la caja!", type = "success")
                         print(senial)
                         print(class(senial))
-                        print(inventario_df)
+                        print(values$inventario_df)
                         print(msg)
                         
                         senial2 <- "4"
@@ -2085,7 +2097,7 @@ app_server <- function(input, output, session ) {
                         shinyalert::shinyalert("La caja ha sido completada!", type = "success")
                         print(senial2)
                         print(class(senial2))
-                        print(inventario_df)
+                        print(values$inventario_df)
                         print(msg2)
                         
                     }
@@ -2102,9 +2114,9 @@ app_server <- function(input, output, session ) {
                                     Signal2 = senial2,
                                     Accion2 = msg2)
                 
-                inventario_parcial <<- inventario_parcial %>% dplyr::bind_rows(x)
+                values$inventario_parcial <- values$inventario_parcial %>% dplyr::bind_rows(x) # inventario_parcial <<- inventario_parcial %>% dplyr::bind_rows(x)
                 
-                inventarioActual <- inventario_df %>% dplyr::bind_rows(inventario_parcial)
+                inventarioActual <- values$inventario_df %>% dplyr::bind_rows(values$inventario_parcial) # inventario_parcial
                 readr::write_csv(inventarioActual, glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Actual_Caja{numeroCaja}.csv"))
                 
                 
@@ -2300,9 +2312,9 @@ app_server <- function(input, output, session ) {
         # senial <- inferencePrediction$bit
         # print(dato)
         
-        serial::write.serialConnection(conn, senial)
+        serial::write.serialConnection(values$conn, senial)
         Sys.sleep(2)
-        serial::write.serialConnection(conn, senial2)
+        serial::write.serialConnection(values$conn, senial2)
         
         # Sys.sleep(15)
         
@@ -2372,10 +2384,10 @@ app_server <- function(input, output, session ) {
             #     close(conn)
             # } else {
             #     conn <- NULL
-            #     
-            # }
             # 
-            # close(conn)
+            # }
+# 
+#             close(conn)
             
             shinyjs::js$closeWindow()
             stopApp()
