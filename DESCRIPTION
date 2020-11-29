@@ -9,7 +9,7 @@ Description: Applicación web que asiste, agiliza y facilita el armado de cajas 
                      la inferencia de resultados y la generación de reportes para hacer gestión.
                      Su uso está orientado para el armado de cajas quirurgicas, sin embargo, el proceso
                      es generico, por lo que puede extenderse su uso a otras aplicaciones sin problemas.
-License: MIT + file LICENSE
+License: GPL-3
 Imports: 
     config,
     golem,
