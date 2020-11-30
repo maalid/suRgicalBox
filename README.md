@@ -29,7 +29,7 @@ aplicaciones sin problemas.
 
 ## Instalación
 
-Para tener acceso a modificar la configuración de las cámaras web, es necesario instalar `ffmpeg`. Para esto, descargar la
+Para tener acceso a modificar la configuración de las cámaras web, es necesario instalar `ffmpeg`. Para esto, descarga la
 compilación estática de [`FFmpeg Builds`](http://ffmpeg-static.acyun.org/), descomprimela, cambia el
 nombre de la carpeta a `FFmpeg` y pegala en `C:\`. Finalmente, agregua `C:\FFmpeg\bin` al PATH (ver [WikiHow](https://es.wikihow.com/instalar-FFmpeg-en-Windows)).
 
