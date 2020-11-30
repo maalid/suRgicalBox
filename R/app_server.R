@@ -376,6 +376,14 @@ app_server <- function(input, output, session ) {
             shinyjs::enable(id = "saveAnnotations")
             
             shinyjs::enable(id = "etiqueta")
+            
+            shinyjs::enable(id = "siameseModelTrainBatchSize")
+            shinyjs::enable(id = "siameseModelTrainSteps")
+            shinyjs::enable(id = "siameseModelValidationBatchSize")
+            shinyjs::enable(id = "siameseModelValidationSteps")
+            shinyjs::enable(id = "siameseModelEmbedingSize")
+            shinyjs::enable(id = "siameseModelEpocas")
+            shinyjs::enable(id = "siameseModelTrain")
         
             shinyjs::enable(id = "ports")
             
@@ -386,7 +394,29 @@ app_server <- function(input, output, session ) {
             # inventario_df <<- readr::read_csv(file = glue::glue("{workingFolderName}/Caja{numeroCaja}/Inventario/Inventario_Caja{numeroCaja}.csv"))
         }
         
-        # print(inventario_df)
+        shiny::updateSelectInput(session, 
+                                 inputId = "siameseModelTrainBatchSize", 
+                                 label = "Train Batch Size", 
+                                 choices = {train_images <- list.files(glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Imagenes/Train/"), pattern = ".jpeg", recursive = TRUE) %>% 
+                                              tibble::as_tibble() %>% 
+                                              dplyr::filter(stringr::str_detect(value, "Brightness") & stringr::str_detect(value, ".jpeg"))
+                                 number_train_images <- nrow(train_images)
+                                 train_batch_size_df <- tibble::tibble(training_batch_size = rep(1:number_train_images), div = number_train_images/training_batch_size, resto = div %% 1)
+                                 train_batch_size <- train_batch_size_df %>% dplyr::filter(resto == 0) 
+                                 train_batch_size$training_batch_size},
+                                 selected = 20)
+        
+        shiny::updateSelectInput(session, 
+                                 inputId = "siameseModelValidationBatchSize", 
+                                 label = "Validation Batch Size", 
+                                 choices = {validation_images <- list.files(glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Imagenes/Validation/"), pattern = ".jpeg", recursive = TRUE) %>% 
+                                              tibble::as_tibble() %>% 
+                                              dplyr::filter(stringr::str_detect(value, "Brightness") & stringr::str_detect(value, ".jpeg"))
+                                 number_validation_images <- nrow(validation_images)
+                                 validation_batch_size_df <- tibble::tibble(validating_batch_size = rep(1:number_validation_images), div = number_validation_images/validating_batch_size, resto = div %% 1)
+                                 validation_batch_size <- validation_batch_size_df %>% dplyr::filter(resto == 0) 
+                                 validation_batch_size$validating_batch_size},
+                                 selected = 20)
         
         
     })
@@ -416,6 +446,16 @@ app_server <- function(input, output, session ) {
         
         shinyjs::disable(id = "etiqueta")
         
+        shinyjs::disable(id = "siameseModelTrainBatchSize")
+        shinyjs::disable(id = "siameseModelTrainSteps")
+        shinyjs::disable(id = "siameseModelValidationBatchSize")
+        shinyjs::disable(id = "siameseModelValidationSteps")
+        shinyjs::disable(id = "siameseModelEmbedingSize")
+        shinyjs::disable(id = "siameseModelEpocas")
+        shinyjs::disable(id = "siameseModelTrain")
+        shinyjs::disable(id = "siameseModelBestEpoch")
+        shinyjs::disable(id = "bestSiameseModelWeight")
+        
         # Resetear contador
         counter(1)
         
@@ -429,6 +469,23 @@ app_server <- function(input, output, session ) {
         shiny::updateSelectInput(session, inputId = "setType", selected = "Train")
         shiny::updateSelectInput(session, inputId = "etiqueta", selected = "--> etiqueta <--")
         shiny::updateTextAreaInput(session, inputId = "annotations", label = "Anotaciones", value = "", placeholder = "Escriba aca sus anotaciones")
+        
+        shiny::updateSelectInput(session, inputId = "siameseModelTrainBatchSize", label = "Train Batch Size", choices = 0, selected = 20)
+        shiny::updateSelectInput(session, inputId = "siameseModelTrainSteps",  selected = 32)
+        shiny::updateSelectInput(session, inputId = "siameseModelValidationBatchSize", label = "Validation Batch Size", choices = 0, selected = 20)
+        shiny::updateSelectInput(session, inputId = "siameseModelValidationSteps", selected = 32)
+        shiny::updateSelectInput(session, inputId = "siameseModelEmbedingSize", selected = 82)
+        shiny::updateSelectInput(session, inputId = "siameseModelEpocas", selected = 15)
+        shiny::updateSelectInput(session, inputId = "siameseModelBestEpoch", selected = 1)
+        
+        output$siameseModelEpochNumber <- NULL
+        output$siameseModelStepNumber <- NULL
+        output$siameseModelValAccEndBatch <- NULL
+        output$siameseModelValLossEndBatch <- NULL
+        output$siameseModelValAccMetric <- NULL
+        output$siameseModelValLossMetric <- NULL
+        output$siameseModelMetrics <- NULL
+        output$siameseModelMetricsPlot <- NULL
         
     })
     
@@ -453,6 +510,16 @@ app_server <- function(input, output, session ) {
         
         shinyjs::disable(id = "etiqueta")
         
+        shinyjs::disable(id = "siameseModelTrainBatchSize")
+        shinyjs::disable(id = "siameseModelTrainSteps")
+        shinyjs::disable(id = "siameseModelValidationBatchSize")
+        shinyjs::disable(id = "siameseModelValidationSteps")
+        shinyjs::disable(id = "siameseModelEmbedingSize")
+        shinyjs::disable(id = "siameseModelEpocas")
+        shinyjs::disable(id = "siameseModelTrain")
+        shinyjs::disable(id = "siameseModelBestEpoch")
+        shinyjs::disable(id = "bestSiameseModelWeight")
+        
         # Resetear contador
         counter(1)
         
@@ -463,6 +530,23 @@ app_server <- function(input, output, session ) {
         shiny::updateSelectInput(session, inputId = "setType", selected = "Train")
         shiny::updateSelectInput(session, inputId = "etiqueta", selected = "--> etiqueta <--")
         shiny::updateTextAreaInput(session, inputId = "annotations", label = "Anotaciones", value = "", placeholder = "Escriba aca sus anotaciones")
+        
+        shiny::updateSelectInput(session, inputId = "siameseModelTrainBatchSize", label = "Train Batch Size", choices = 0, selected = 20)
+        shiny::updateSelectInput(session, inputId = "siameseModelTrainSteps",  selected = 32)
+        shiny::updateSelectInput(session, inputId = "siameseModelValidationBatchSize", label = "Validation Batch Size", choices = 0, selected = 20)
+        shiny::updateSelectInput(session, inputId = "siameseModelValidationSteps", selected = 32)
+        shiny::updateSelectInput(session, inputId = "siameseModelEmbedingSize", selected = 82)
+        shiny::updateSelectInput(session, inputId = "siameseModelEpocas", selected = 15)
+        shiny::updateSelectInput(session, inputId = "siameseModelBestEpoch", selected = 1)
+        
+        output$siameseModelEpochNumber <- NULL
+        output$siameseModelStepNumber <- NULL
+        output$siameseModelValAccEndBatch <- NULL
+        output$siameseModelValLossEndBatch <- NULL
+        output$siameseModelValAccMetric <- NULL
+        output$siameseModelValLossMetric <- NULL
+        output$siameseModelMetrics <- NULL
+        output$siameseModelMetricsPlot <- NULL
         
     })
     
@@ -514,6 +598,36 @@ app_server <- function(input, output, session ) {
         
         shinyjs::enable(id = "etiqueta")
         
+        workingFolderName <- shinyFiles::parseDirPath(volumes, input$WorkingDirectory)
+        
+        numeroCaja <- input$caja
+        
+        numeroExperimento <- input$experimento
+        
+        shiny::updateSelectInput(session, 
+                                 inputId = "siameseModelTrainBatchSize", 
+                                 label = "Train Batch Size", 
+                                 choices = {train_images <- list.files(glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Imagenes/Train/"), pattern = ".jpeg", recursive = TRUE) %>% 
+                                     tibble::as_tibble() %>% 
+                                     dplyr::filter(stringr::str_detect(value, "Brightness") & stringr::str_detect(value, ".jpeg"))
+                                 number_train_images <- nrow(train_images)
+                                 train_batch_size_df <- tibble::tibble(training_batch_size = rep(1:number_train_images), div = number_train_images/training_batch_size, resto = div %% 1)
+                                 train_batch_size <- train_batch_size_df %>% dplyr::filter(resto == 0) 
+                                 train_batch_size$training_batch_size},
+                                 selected = 20)
+        
+        shiny::updateSelectInput(session, 
+                                 inputId = "siameseModelValidationBatchSize", 
+                                 label = "Validation Batch Size", 
+                                 choices = {validation_images <- list.files(glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Imagenes/Validation/"), pattern = ".jpeg", recursive = TRUE) %>% 
+                                     tibble::as_tibble() %>% 
+                                     dplyr::filter(stringr::str_detect(value, "Brightness") & stringr::str_detect(value, ".jpeg"))
+                                 number_validation_images <- nrow(validation_images)
+                                 validation_batch_size_df <- tibble::tibble(validating_batch_size = rep(1:number_validation_images), div = number_validation_images/validating_batch_size, resto = div %% 1)
+                                 validation_batch_size <- validation_batch_size_df %>% dplyr::filter(resto == 0) 
+                                 validation_batch_size$validating_batch_size},
+                                 selected = 20)
+        
         # numeroExperimento <- input$experimento
         
     })
@@ -524,7 +638,7 @@ app_server <- function(input, output, session ) {
         # Resetear contador
         counter(1)
         
-        updateSelectInput(session, inputId = "setType", selected = "Train_Raw") # updateSelectInput
+        shiny::updateSelectInput(session, inputId = "setType", selected = "Train_Raw") # updateSelectInput
     })
     
     # 6. CONTADORES ----
@@ -564,19 +678,19 @@ app_server <- function(input, output, session ) {
             numeroCaja <- input$caja
             numeroExperimento <- input$experimento
             
-            setFolderName <- as.character(input$setType)
-            imagesPath <- glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Imagenes_Raw/{setFolderName}")
+            setRawFolderName <- as.character(input$setType)
+            imagesRawPath <- glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Imagenes_Raw/{setRawFolderName}")
             
-            if (setFolderName == "Train_Raw" | setFolderName == "Validation_Raw") {
-                classFolderName <- glue::glue("{imagesPath}/{photoLabel}/")
-                if (!dir.exists(classFolderName)) {
-                    dir.create(file.path(classFolderName))
+            if (setRawFolderName == "Train_Raw" | setRawFolderName == "Validation_Raw") {
+                classRawFolderName <- glue::glue("{imagesRawPath}/{photoLabel}/")
+                if (!dir.exists(classRawFolderName)) {
+                    dir.create(file.path(classRawFolderName))
                 }
                 
-                saveImagesPath <- classFolderName #glue::glue("{imagesPath}/{photoLabel}/")
+                saveImagesRawPath <- classRawFolderName #glue::glue("{imagesRawPath}/{photoLabel}/")
             }
             else {
-                saveImagesPath <- glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Imagenes_Raw/{setFolderName}/")
+                saveImagesRawPath <- glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Imagenes_Raw/{setRawFolderName}/")
             }
             
             fileName_cam1 <- sprintf("%s_%s_%s_%s_%s",
@@ -601,27 +715,218 @@ app_server <- function(input, output, session ) {
                 fileName_cam2
             })
             
-            outconn <- file(description = paste0(saveImagesPath, fileName_cam1, ".jpeg"),
+            outconn <- file(description = paste0(saveImagesRawPath, fileName_cam1, ".jpeg"),
                             open = "wb")
             # Guardar imagen a disco duro
             base64enc::base64decode(what = inconn, output = outconn)
             close(outconn)
             
-            outconn2 <- file(description = paste0(saveImagesPath, fileName_cam2, ".jpeg"),
+            outconn2 <- file(description = paste0(saveImagesRawPath, fileName_cam2, ".jpeg"),
                              open = "wb")
             # Guardar imagen a disco duro
             base64enc::base64decode(what = inconn2, output = outconn2)
             close(outconn2)
             
+            
+            
+            ima <- magick::image_read(glue::glue("{saveImagesRawPath}/{fileName_cam1}.jpeg")) %>% 
+                magick::image_crop(magick::geometry_area(x_off = 2, y_off = 2), repage = FALSE) %>% 
+                magick::image_edge() %>%
+                magick::image_negate() %>%
+                magick::image_resize(geometry = magick::geometry_size_pixels(width = 337, height = 337, preserve_aspect = F)) %>% #opcional, usado para experimento_70
+                magick::image_data("gray") %>%
+                as.integer() %>% 
+                sketcher::sketch(style = 2,
+                                 lineweight = 4,
+                                 smooth = 3,
+                                 gain = 0.1,
+                                 contrast = 5,
+                                 shadow = 19) %>%
+                magick::image_read()
+            
+            ima2 <- magick::image_read(glue::glue("{saveImagesRawPath}/{fileName_cam2}.jpeg")) %>% 
+                magick::image_crop(magick::geometry_area(x_off = 2, y_off = 2), repage = FALSE) %>% 
+                magick::image_edge() %>%
+                magick::image_negate() %>%
+                magick::image_resize(geometry = magick::geometry_size_pixels(width = 337, height = 337, preserve_aspect = F)) %>% #opcional, usado para experimento_70
+                magick::image_data("gray") %>%
+                as.integer() %>% 
+                sketcher::sketch(style = 2,
+                                 lineweight = 4,
+                                 smooth = 3,
+                                 gain = 0.1,
+                                 contrast = 5,
+                                 shadow = 19) %>%
+                magick::image_read()
+            
+            
+            if (setRawFolderName == "Train_Raw") {
+                setFolderName <- "Train"
+            } else if (setRawFolderName == "Validation_Raw") {
+                setFolderName <- "Validation"
+            } else if (setRawFolderName == "Test_Raw") {
+                setFolderName <- "Test"
+            } else if (setRawFolderName == "Anchors_Raw") {
+                setFolderName <- "Anchors"
+            }
+            
+            if (setFolderName == "Train" | setFolderName == "Validation") {
+                classFolderName <- glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Imagenes/{setFolderName}/{photoLabel}")
+                if (!dir.exists(classFolderName)) {
+                    dir.create(file.path(classFolderName))
+                }
+                
+                saveImagesPath <- classFolderName #glue::glue("{imagesRawPath}/{photoLabel}/")
+            }
+            else {
+                saveImagesPath <- glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Imagenes/{setFolderName}")
+            }
+            
+            ima_name <- gsub("_Raw", glue::glue("_Brightness100"), glue::glue("{fileName_cam1}"))
+            ima %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima_name}.jpeg"), format = "jpeg")
+            ima2_name <- gsub("_Raw", glue::glue("_Brightness100"), glue::glue("{fileName_cam2}"))
+            ima2 %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima2_name}.jpeg"), format = "jpeg")
+            
+            ## 2 Imagen Original Floped
+            ima_floped_name <- gsub("_Raw", glue::glue("_Brightness100Floped"), glue::glue("{fileName_cam1}"))
+            ima %>% 
+                magick::image_flop() %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima_floped_name}.jpeg"), format = "jpeg")
+            ima2_floped_name <- gsub("_Raw", glue::glue("_Brightness100Floped"), glue::glue("{fileName_cam2}"))
+            ima2 %>% 
+                magick::image_flop() %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima2_floped_name}.jpeg"), format = "jpeg")
+            
+            ## 3 Imagen original fliped
+            ima_fliped_name <- gsub("_Raw", glue::glue("_Brightness100Fliped"), glue::glue("{fileName_cam1}"))
+            ima %>% 
+                magick::image_flip() %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima_fliped_name}.jpeg"), format = "jpeg")
+            ima2_fliped_name <- gsub("_Raw", glue::glue("_Brightness100Fliped"), glue::glue("{fileName_cam2}"))
+            ima2 %>% 
+                magick::image_flip() %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima2_fliped_name}.jpeg"), format = "jpeg")
+            
+            ## 4 Imagen original floiped
+            ima_floiped_name <- gsub("_Raw", glue::glue("_Brightness100Floiped"), glue::glue("{fileName_cam1}"))
+            ima %>% 
+                magick::image_flop() %>%
+                magick::image_flip() %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima_floiped_name}.jpeg"), format = "jpeg")
+            ima2_floiped_name <- gsub("_Raw", glue::glue("_Brightness100Floiped"), glue::glue("{fileName_cam2}"))
+            ima2 %>% 
+                magick::image_flop() %>%
+                magick::image_flip() %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima2_floiped_name}.jpeg"), format = "jpeg")
+            
+            ## 5 Imagen original brightnessed low
+            ima_brightnessLow_name <- gsub("_Raw", glue::glue("_Brightness{brightness_low}"), glue::glue("{fileName_cam1}"))
+            ima %>% 
+                magick::image_modulate(brightness = glue::glue("{brightness_low}"), saturation = glue::glue("{saturation_low}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima_brightnessLow_name}.jpeg"), format = "jpeg")
+            ima2_brightnessLow_name <- gsub("_Raw", glue::glue("_Brightness{brightness_low}"), glue::glue("{fileName_cam2}"))
+            ima2 %>% 
+                magick::image_modulate(brightness = glue::glue("{brightness_low}"), saturation = glue::glue("{saturation_low}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima2_brightnessLow_name}.jpeg"), format = "jpeg")
+            
+            ## 6 Imagen original brightnessed 120
+            ima_brightnessHigh_name <- gsub("_Raw", glue::glue("_Brightness{brightness_high}"), glue::glue("{fileName_cam1}"))
+            ima %>% 
+                magick::image_modulate(brightness = glue::glue("{brightness_high}"), saturation = glue::glue("{saturation_high}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima_brightnessHigh_name}.jpeg"), format = "jpeg")
+            ima2_brightnessHigh_name <- gsub("_Raw", glue::glue("_Brightness{brightness_high}"), glue::glue("{fileName_cam2}"))
+            ima2 %>% 
+                magick::image_modulate(brightness = glue::glue("{brightness_high}"), saturation = glue::glue("{saturation_high}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima2_brightnessHigh_name}.jpeg"), format = "jpeg")
+            
+            ### 7 Imagen original floped brightnessed low
+            ima_floped_brightnessLow_name <- gsub("_Raw", glue::glue("_Brightness{brightness_low}Floped"), glue::glue("{fileName_cam1}"))
+            ima %>% 
+                magick::image_flop() %>%
+                magick::image_modulate(brightness = glue::glue("{brightness_low}"), saturation = glue::glue("{saturation_low}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima_floped_brightnessLow_name}.jpeg"), format = "jpeg")
+            ima2_floped_brightnessLow_name <- gsub("_Raw", glue::glue("_Brightness{brightness_low}Floped"), glue::glue("{fileName_cam2}"))
+            ima2 %>% 
+                magick::image_flop() %>%
+                magick::image_modulate(brightness = glue::glue("{brightness_low}"), saturation = glue::glue("{saturation_low}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima2_floped_brightnessLow_name}.jpeg"), format = "jpeg")
+            
+            ### 8 Imagen original floped brightnessed high
+            ima_floped_brightnessHigh_name <- gsub("_Raw", glue::glue("_Brightness{brightness_high}Floped"), glue::glue("{fileName_cam1}"))
+            ima %>% 
+                magick::image_flop() %>%
+                magick::image_modulate(brightness = glue::glue("{brightness_high}"), saturation = glue::glue("{saturation_high}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima_floped_brightnessHigh_name}.jpeg"), format = "jpeg")
+            ima2_floped_brightnessHigh_name <- gsub("_Raw", glue::glue("_Brightness{brightness_high}Floped"), glue::glue("{fileName_cam2}"))
+            ima2 %>% 
+                magick::image_flop() %>%
+                magick::image_modulate(brightness = glue::glue("{brightness_high}"), saturation = glue::glue("{saturation_high}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima2_floped_brightnessHigh_name}.jpeg"), format = "jpeg")
+            
+            ### 9 Imagen original fliped brightnessed low
+            ima_fliped_brightnessLow_name <- gsub("_Raw", glue::glue("_Brightness{brightness_low}Fliped"), glue::glue("{fileName_cam1}"))
+            ima %>% 
+                magick::image_flip() %>%
+                magick::image_modulate(brightness = glue::glue("{brightness_low}"), saturation = glue::glue("{saturation_low}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima_fliped_brightnessLow_name}.jpeg"), format = "jpeg")
+            ima2_fliped_brightnessLow_name <- gsub("_Raw", glue::glue("_Brightness{brightness_low}Fliped"), glue::glue("{fileName_cam2}"))
+            ima2 %>% 
+                magick::image_flip() %>%
+                magick::image_modulate(brightness = glue::glue("{brightness_low}"), saturation = glue::glue("{saturation_low}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima2_fliped_brightnessLow_name}.jpeg"), format = "jpeg")
+            
+            ### 10 Imagen original fliped brightnessed high
+            ima_fliped_brightnessHigh_name <- gsub("_Raw", glue::glue("_Brightness{brightness_high}Fliped"), glue::glue("{fileName_cam1}"))
+            ima %>% 
+                magick::image_flip() %>%
+                magick::image_modulate(brightness = glue::glue("{brightness_high}"), saturation = glue::glue("{saturation_high}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima_fliped_brightnessHigh_name}.jpeg"), format = "jpeg")
+            ima2_fliped_brightnessHigh_name <- gsub("_Raw", glue::glue("_Brightness{brightness_high}Fliped"), glue::glue("{fileName_cam2}"))
+            ima2 %>% 
+                magick::image_flip() %>%
+                magick::image_modulate(brightness = glue::glue("{brightness_high}"), saturation = glue::glue("{saturation_high}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima2_fliped_brightnessHigh_name}.jpeg"), format = "jpeg")
+            
+            ### 11 Imagen original floiped brightnessed low
+            ima_floiped_brightnessLow_name <- gsub("_Raw", glue::glue("_Brightness{brightness_low}Floiped"), glue::glue("{fileName_cam1}"))
+            ima %>% 
+                magick::image_flop() %>% 
+                magick::image_flip() %>%
+                magick::image_modulate(brightness = glue::glue("{brightness_low}"), saturation = glue::glue("{saturation_low}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima_floiped_brightnessLow_name}.jpeg"), format = "jpeg")
+            ima2_floiped_brightnessLow_name <- gsub("_Raw", glue::glue("_Brightness{brightness_low}Floiped"), glue::glue("{fileName_cam2}"))
+            ima2 %>% 
+                magick::image_flop() %>% 
+                magick::image_flip() %>%
+                magick::image_modulate(brightness = glue::glue("{brightness_low}"), saturation = glue::glue("{saturation_low}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima2_floiped_brightnessLow_name}.jpeg"), format = "jpeg")
+            
+            ### 12 Imagen original floiped brightnessed high
+            ima_floiped_brightnessHigh_name <- gsub("_Raw", glue::glue("_Brightness{brightness_high}Floiped"), glue::glue("{fileName_cam1}"))
+            ima %>% 
+                magick::image_flop() %>% 
+                magick::image_flip() %>%
+                magick::image_modulate(brightness = glue::glue("{brightness_high}"), saturation = glue::glue("{saturation_high}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima_floiped_brightnessHigh_name}.jpeg"), format = "jpeg")
+            ima2_floiped_brightnessHigh_name <- gsub("_Raw", glue::glue("_Brightness{brightness_high}Floiped"), glue::glue("{fileName_cam2}"))
+            ima2 %>% 
+                magick::image_flop() %>% 
+                magick::image_flip() %>%
+                magick::image_modulate(brightness = glue::glue("{brightness_high}"), saturation = glue::glue("{saturation_high}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima2_floiped_brightnessHigh_name}.jpeg"), format = "jpeg")
+            
+            
             output$imagenCam1 <- renderImage({
-                cam1Filename <- glue::glue("{saveImagesPath}/{fileName_cam1}.jpeg")
+                cam1Filename <- glue::glue("{saveImagesRawPath}/{fileName_cam1}.jpeg")
                 list(src = cam1Filename,
                      width = 224,
                      height = 210)
             }, deleteFile = FALSE)
             
             output$imagenCam2 <- renderImage({
-                cam2Filename <- glue::glue("{saveImagesPath}/{fileName_cam2}.jpeg")
+                cam2Filename <- glue::glue("{saveImagesRawPath}/{fileName_cam2}.jpeg")
                 list(src = cam2Filename,
                      width = 224,
                      height = 210)
@@ -630,6 +935,30 @@ app_server <- function(input, output, session ) {
             # Aumentar contador
             nwCnt <- counter() + 1
             counter(nwCnt)
+            
+            shiny::updateSelectInput(session, 
+                              inputId = "siameseModelTrainBatchSize", 
+                              label = "Train Batch Size", 
+                              choices = {train_images <- list.files(glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Imagenes/Train/"), pattern = ".jpeg", recursive = TRUE) %>% 
+                                  tibble::as_tibble() %>% 
+                                  dplyr::filter(stringr::str_detect(value, "Brightness") & stringr::str_detect(value, ".jpeg"))
+                              number_train_images <- nrow(train_images)
+                              train_batch_size_df <- tibble::tibble(training_batch_size = rep(1:number_train_images), div = number_train_images/training_batch_size, resto = div %% 1)
+                              train_batch_size <- train_batch_size_df %>% dplyr::filter(resto == 0) 
+                              train_batch_size$training_batch_size},
+                              selected = 20)
+            
+            shiny::updateSelectInput(session, 
+                              inputId = "siameseModelValidationBatchSize", 
+                              label = "Validation Batch Size", 
+                              choices = {validation_images <- list.files(glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Imagenes/Validation/"), pattern = ".jpeg", recursive = TRUE) %>% 
+                                  tibble::as_tibble() %>% 
+                                  dplyr::filter(stringr::str_detect(value, "Brightness") & stringr::str_detect(value, ".jpeg"))
+                              number_validation_images <- nrow(validation_images)
+                              validation_batch_size_df <- tibble::tibble(validating_batch_size = rep(1:number_validation_images), div = number_validation_images/validating_batch_size, resto = div %% 1)
+                              validation_batch_size <- validation_batch_size_df %>% dplyr::filter(resto == 0) 
+                              validation_batch_size$validating_batch_size},
+                              selected = 20)
             
             shinyjs::enable(id = "NuevoExperimento")
             shinyjs::enable(id = "setType")
@@ -678,19 +1007,19 @@ app_server <- function(input, output, session ) {
             numeroCaja <- input$caja
             numeroExperimento <- input$experimento
             
-            setFolderName <- as.character(input$setType)
-            imagesPath <- glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Imagenes_Raw/{setFolderName}")
+            setRawFolderName <- as.character(input$setType)
+            imagesRawPath <- glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Imagenes_Raw/{setRawFolderName}")
             
-            if (setFolderName == "Train_Raw" | setFolderName == "Validation_Raw") {
-                classFolderName <- glue::glue("{imagesPath}/{photoLabel}/")
-                if (!dir.exists(classFolderName)) {
-                    dir.create(file.path(classFolderName))
+            if (setRawFolderName == "Train_Raw" | setRawFolderName == "Validation_Raw") {
+                classRawFolderName <- glue::glue("{imagesRawPath}/{photoLabel}/")
+                if (!dir.exists(classRawFolderName)) {
+                    dir.create(file.path(classRawFolderName))
                 }
                 
-                saveImagesPath <- classFolderName #glue::glue("{imagesPath}/{photoLabel}/")
+                saveImagesRawPath <- classRawFolderName #glue::glue("{imagesRawPath}/{photoLabel}/")
             }
             else {
-                saveImagesPath <- glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Imagenes_Raw/{setFolderName}/")
+                saveImagesRawPath <- glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Imagenes_Raw/{setRawFolderName}/")
             }
             
             fileName_cam1 <- sprintf("%s_%s_%s_%s_%s",
@@ -715,28 +1044,217 @@ app_server <- function(input, output, session ) {
                 fileName_cam2
             })
             
-            outconn <- file(description = paste0(saveImagesPath, fileName_cam1, ".jpeg"),
+            outconn <- file(description = paste0(saveImagesRawPath, fileName_cam1, ".jpeg"),
                             open = "wb")
             
             # Guardar imagen a disco duro
             base64enc::base64decode(what = inconn, output = outconn)
             close(outconn)
             
-            outconn2 <- file(description = paste0(saveImagesPath, fileName_cam2, ".jpeg"),
+            outconn2 <- file(description = paste0(saveImagesRawPath, fileName_cam2, ".jpeg"),
                              open = "wb")
             # Guardar imagen a disco duro
             base64enc::base64decode(what = inconn2, output = outconn2)
             close(outconn2)
             
+            
+            ima <- magick::image_read(glue::glue("{saveImagesRawPath}/{fileName_cam1}.jpeg")) %>% 
+                magick::image_crop(magick::geometry_area(x_off = 2, y_off = 2), repage = FALSE) %>% 
+                magick::image_edge() %>%
+                magick::image_negate() %>%
+                magick::image_resize(geometry = magick::geometry_size_pixels(width = 337, height = 337, preserve_aspect = F)) %>% #opcional, usado para experimento_70
+                magick::image_data("gray") %>%
+                as.integer() %>% 
+                sketcher::sketch(style = 2,
+                                 lineweight = 4,
+                                 smooth = 3,
+                                 gain = 0.1,
+                                 contrast = 5,
+                                 shadow = 19) %>%
+                magick::image_read()
+            
+            ima2 <- magick::image_read(glue::glue("{saveImagesRawPath}/{fileName_cam2}.jpeg")) %>% 
+                magick::image_crop(magick::geometry_area(x_off = 2, y_off = 2), repage = FALSE) %>% 
+                magick::image_edge() %>%
+                magick::image_negate() %>%
+                magick::image_resize(geometry = magick::geometry_size_pixels(width = 337, height = 337, preserve_aspect = F)) %>% #opcional, usado para experimento_70
+                magick::image_data("gray") %>%
+                as.integer() %>% 
+                sketcher::sketch(style = 2,
+                                 lineweight = 4,
+                                 smooth = 3,
+                                 gain = 0.1,
+                                 contrast = 5,
+                                 shadow = 19) %>%
+                magick::image_read()
+            
+            if (setRawFolderName == "Train_Raw") {
+                setFolderName <- "Train"
+            } else if (setRawFolderName == "Validation_Raw") {
+                setFolderName <- "Validation"
+            } else if (setRawFolderName == "Test_Raw") {
+                setFolderName <- "Test"
+            } else if (setRawFolderName == "Anchors_Raw") {
+                setFolderName <- "Anchors"
+            }
+            
+            if (setFolderName == "Train" | setFolderName == "Validation") {
+                classFolderName <- glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Imagenes/{setFolderName}/{photoLabel}")
+                if (!dir.exists(classFolderName)) {
+                    dir.create(file.path(classFolderName))
+                }
+                
+                saveImagesPath <- classFolderName #glue::glue("{imagesRawPath}/{photoLabel}/")
+            }
+            else {
+                saveImagesPath <- glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Imagenes/{setFolderName}")
+            }
+            
+            ima_name <- gsub("_Raw", glue::glue("_Brightness100"), glue::glue("{fileName_cam1}"))
+            ima %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima_name}.jpeg"), format = "jpeg")
+            ima2_name <- gsub("_Raw", glue::glue("_Brightness100"), glue::glue("{fileName_cam2}"))
+            ima2 %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima2_name}.jpeg"), format = "jpeg")
+            
+            ## 2 Imagen Original Floped
+            ima_floped_name <- gsub("_Raw", glue::glue("_Brightness100Floped"), glue::glue("{fileName_cam1}"))
+            ima %>% 
+                magick::image_flop() %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima_floped_name}.jpeg"), format = "jpeg")
+            ima2_floped_name <- gsub("_Raw", glue::glue("_Brightness100Floped"), glue::glue("{fileName_cam2}"))
+            ima2 %>% 
+                magick::image_flop() %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima2_floped_name}.jpeg"), format = "jpeg")
+            
+            ## 3 Imagen original fliped
+            ima_fliped_name <- gsub("_Raw", glue::glue("_Brightness100Fliped"), glue::glue("{fileName_cam1}"))
+            ima %>% 
+                magick::image_flip() %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima_fliped_name}.jpeg"), format = "jpeg")
+            ima2_fliped_name <- gsub("_Raw", glue::glue("_Brightness100Fliped"), glue::glue("{fileName_cam2}"))
+            ima2 %>% 
+                magick::image_flip() %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima2_fliped_name}.jpeg"), format = "jpeg")
+            
+            ## 4 Imagen original floiped
+            ima_floiped_name <- gsub("_Raw", glue::glue("_Brightness100Floiped"), glue::glue("{fileName_cam1}"))
+            ima %>% 
+                magick::image_flop() %>%
+                magick::image_flip() %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima_floiped_name}.jpeg"), format = "jpeg")
+            ima2_floiped_name <- gsub("_Raw", glue::glue("_Brightness100Floiped"), glue::glue("{fileName_cam2}"))
+            ima2 %>% 
+                magick::image_flop() %>%
+                magick::image_flip() %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima2_floiped_name}.jpeg"), format = "jpeg")
+            
+            ## 5 Imagen original brightnessed low
+            ima_brightnessLow_name <- gsub("_Raw", glue::glue("_Brightness{brightness_low}"), glue::glue("{fileName_cam1}"))
+            ima %>% 
+                magick::image_modulate(brightness = glue::glue("{brightness_low}"), saturation = glue::glue("{saturation_low}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima_brightnessLow_name}.jpeg"), format = "jpeg")
+            ima2_brightnessLow_name <- gsub("_Raw", glue::glue("_Brightness{brightness_low}"), glue::glue("{fileName_cam2}"))
+            ima2 %>% 
+                magick::image_modulate(brightness = glue::glue("{brightness_low}"), saturation = glue::glue("{saturation_low}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima2_brightnessLow_name}.jpeg"), format = "jpeg")
+            
+            ## 6 Imagen original brightnessed 120
+            ima_brightnessHigh_name <- gsub("_Raw", glue::glue("_Brightness{brightness_high}"), glue::glue("{fileName_cam1}"))
+            ima %>% 
+                magick::image_modulate(brightness = glue::glue("{brightness_high}"), saturation = glue::glue("{saturation_high}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima_brightnessHigh_name}.jpeg"), format = "jpeg")
+            ima2_brightnessHigh_name <- gsub("_Raw", glue::glue("_Brightness{brightness_high}"), glue::glue("{fileName_cam2}"))
+            ima2 %>% 
+                magick::image_modulate(brightness = glue::glue("{brightness_high}"), saturation = glue::glue("{saturation_high}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima2_brightnessHigh_name}.jpeg"), format = "jpeg")
+            
+            ### 7 Imagen original floped brightnessed low
+            ima_floped_brightnessLow_name <- gsub("_Raw", glue::glue("_Brightness{brightness_low}Floped"), glue::glue("{fileName_cam1}"))
+            ima %>% 
+                magick::image_flop() %>%
+                magick::image_modulate(brightness = glue::glue("{brightness_low}"), saturation = glue::glue("{saturation_low}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima_floped_brightnessLow_name}.jpeg"), format = "jpeg")
+            ima2_floped_brightnessLow_name <- gsub("_Raw", glue::glue("_Brightness{brightness_low}Floped"), glue::glue("{fileName_cam2}"))
+            ima2 %>% 
+                magick::image_flop() %>%
+                magick::image_modulate(brightness = glue::glue("{brightness_low}"), saturation = glue::glue("{saturation_low}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima2_floped_brightnessLow_name}.jpeg"), format = "jpeg")
+            
+            ### 8 Imagen original floped brightnessed high
+            ima_floped_brightnessHigh_name <- gsub("_Raw", glue::glue("_Brightness{brightness_high}Floped"), glue::glue("{fileName_cam1}"))
+            ima %>% 
+                magick::image_flop() %>%
+                magick::image_modulate(brightness = glue::glue("{brightness_high}"), saturation = glue::glue("{saturation_high}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima_floped_brightnessHigh_name}.jpeg"), format = "jpeg")
+            ima2_floped_brightnessHigh_name <- gsub("_Raw", glue::glue("_Brightness{brightness_high}Floped"), glue::glue("{fileName_cam2}"))
+            ima2 %>% 
+                magick::image_flop() %>%
+                magick::image_modulate(brightness = glue::glue("{brightness_high}"), saturation = glue::glue("{saturation_high}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima2_floped_brightnessHigh_name}.jpeg"), format = "jpeg")
+            
+            ### 9 Imagen original fliped brightnessed low
+            ima_fliped_brightnessLow_name <- gsub("_Raw", glue::glue("_Brightness{brightness_low}Fliped"), glue::glue("{fileName_cam1}"))
+            ima %>% 
+                magick::image_flip() %>%
+                magick::image_modulate(brightness = glue::glue("{brightness_low}"), saturation = glue::glue("{saturation_low}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima_fliped_brightnessLow_name}.jpeg"), format = "jpeg")
+            ima2_fliped_brightnessLow_name <- gsub("_Raw", glue::glue("_Brightness{brightness_low}Fliped"), glue::glue("{fileName_cam2}"))
+            ima2 %>% 
+                magick::image_flip() %>%
+                magick::image_modulate(brightness = glue::glue("{brightness_low}"), saturation = glue::glue("{saturation_low}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima2_fliped_brightnessLow_name}.jpeg"), format = "jpeg")
+            
+            ### 10 Imagen original fliped brightnessed high
+            ima_fliped_brightnessHigh_name <- gsub("_Raw", glue::glue("_Brightness{brightness_high}Fliped"), glue::glue("{fileName_cam1}"))
+            ima %>% 
+                magick::image_flip() %>%
+                magick::image_modulate(brightness = glue::glue("{brightness_high}"), saturation = glue::glue("{saturation_high}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima_fliped_brightnessHigh_name}.jpeg"), format = "jpeg")
+            ima2_fliped_brightnessHigh_name <- gsub("_Raw", glue::glue("_Brightness{brightness_high}Fliped"), glue::glue("{fileName_cam2}"))
+            ima2 %>% 
+                magick::image_flip() %>%
+                magick::image_modulate(brightness = glue::glue("{brightness_high}"), saturation = glue::glue("{saturation_high}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima2_fliped_brightnessHigh_name}.jpeg"), format = "jpeg")
+            
+            ### 11 Imagen original floiped brightnessed low
+            ima_floiped_brightnessLow_name <- gsub("_Raw", glue::glue("_Brightness{brightness_low}Floiped"), glue::glue("{fileName_cam1}"))
+            ima %>% 
+                magick::image_flop() %>% 
+                magick::image_flip() %>%
+                magick::image_modulate(brightness = glue::glue("{brightness_low}"), saturation = glue::glue("{saturation_low}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima_floiped_brightnessLow_name}.jpeg"), format = "jpeg")
+            ima2_floiped_brightnessLow_name <- gsub("_Raw", glue::glue("_Brightness{brightness_low}Floiped"), glue::glue("{fileName_cam2}"))
+            ima2 %>% 
+                magick::image_flop() %>% 
+                magick::image_flip() %>%
+                magick::image_modulate(brightness = glue::glue("{brightness_low}"), saturation = glue::glue("{saturation_low}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima2_floiped_brightnessLow_name}.jpeg"), format = "jpeg")
+            
+            ### 12 Imagen original floiped brightnessed high
+            ima_floiped_brightnessHigh_name <- gsub("_Raw", glue::glue("_Brightness{brightness_high}Floiped"), glue::glue("{fileName_cam1}"))
+            ima %>% 
+                magick::image_flop() %>% 
+                magick::image_flip() %>%
+                magick::image_modulate(brightness = glue::glue("{brightness_high}"), saturation = glue::glue("{saturation_high}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima_floiped_brightnessHigh_name}.jpeg"), format = "jpeg")
+            ima2_floiped_brightnessHigh_name <- gsub("_Raw", glue::glue("_Brightness{brightness_high}Floiped"), glue::glue("{fileName_cam2}"))
+            ima2 %>% 
+                magick::image_flop() %>% 
+                magick::image_flip() %>%
+                magick::image_modulate(brightness = glue::glue("{brightness_high}"), saturation = glue::glue("{saturation_high}")) %>% 
+                magick::image_write(path = glue::glue("{saveImagesPath}/{ima2_floiped_brightnessHigh_name}.jpeg"), format = "jpeg")
+            
+            
             output$imagenCam1 <- renderImage({
-                cam1Filename <- glue::glue("{saveImagesPath}/{fileName_cam1}.jpeg")
+                cam1Filename <- glue::glue("{saveImagesRawPath}/{fileName_cam1}.jpeg")
                 list(src = cam1Filename,
                      width = 224,
                      height = 210)
             }, deleteFile = FALSE)
             
             output$imagenCam2 <- renderImage({
-                cam2Filename <- glue::glue("{saveImagesPath}/{fileName_cam2}.jpeg")
+                cam2Filename <- glue::glue("{saveImagesRawPath}/{fileName_cam2}.jpeg")
                 list(src = cam2Filename,
                      width = 224,
                      height = 210)
@@ -745,6 +1263,8 @@ app_server <- function(input, output, session ) {
             # Aumentar contador
             nwCnt <- counter() + 1
             counter(nwCnt)
+            
+            
             
         }
     })
@@ -776,7 +1296,567 @@ app_server <- function(input, output, session ) {
         
     })
     
-    # 9. CONECTAR ARDUINO ----
+    
+    
+    
+    # 9. TRAIN SIAMESE_MODEL ----
+    observeEvent(input$siameseModelTrain, {
+        
+        output$featureModelMetrics <- NULL
+        output$featureModelMetricsPlot <- NULL
+        
+        output$classificationModelMetrics <- NULL
+        output$classificationModelMetricsPlot <- NULL
+        
+        output$siameseModelMetrics <- NULL
+        output$siameseModelMetricsPlot <- NULL
+        
+        shinyjs::disable(id = "experimento")
+        shinyjs::disable(id = "CrearExperimento")
+        shinyjs::disable(id = "NuevoExperimento")
+        
+        shinyjs::disable(id = "setType")
+        
+        shinyjs::disable(id = "BurstSnapshot")
+        shinyjs::disable(id = "stop_BurstSnapshot")
+        shinyjs::disable(id = "snapshot")
+        
+        shinyjs::disable(id = "etiqueta")
+        
+        shinyjs::disable(id = "siameseModelTrainBatchSize")
+        shinyjs::disable(id = "siameseModelTrainSteps")
+        shinyjs::disable(id = "siameseModelValidationBatchSize")
+        shinyjs::disable(id = "siameseModelValidationSteps")
+        shinyjs::disable(id = "siameseModelEmbedingSize")
+        shinyjs::disable(id = "siameseModelEpocas")
+        shinyjs::disable(id = "siameseModelTrain")
+        shinyjs::disable(id = "siameseModelBestEpoch")
+        shinyjs::disable(id = "bestSiameseModelWeight")
+        
+        
+        
+        workingFolderName <- shinyFiles::parseDirPath(volumes, input$WorkingDirectory)
+        numeroCaja <- input$caja
+        numeroExperimento <- input$experimento
+        experimentFolderName <- glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}")
+        classes <- list.files(glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Imagenes/Train/"))
+        number_classes <- length(classes)
+        # train_dir <- glue("Experimento{numeroExperimento}/Imagenes/Train/")
+        # validation_dir <- glue("Experimento{numeroExperimento}/Imagenes/Validation/")
+        modelosPath <- glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Modelos/")
+        
+        if (!dir.exists(modelosPath)) {
+            dir.create(file.path(modelosPath))
+        }
+        
+        siameseModel_epocas <- input$siameseModelEpocas
+        siameseModel_trainBatchSize <- input$siameseModelTrainBatchSize %>% as.numeric()
+        siameseModel_validationBatchSize <- input$siameseModelValidationBatchSize %>% as.numeric()
+        siameseModel_embedingSize <- input$siameseModelEmbedingSize %>% as.numeric()
+        siameseModel_trainSteps <- input$siameseModelTrainSteps
+        siameseModel_validationSteps <- input$siameseModelValidationSteps
+        
+        siameseModel_weights_filepath <- file.path(modelosPath, 
+                                                   sprintf("%s_%s_%s_%s%s", 
+                                                           "SModel_Weights",
+                                                           glue::glue("ES{siameseModel_embedingSize}"),
+                                                           "E{epoch:02d}",
+                                                           glue::glue("Caja{numeroCaja}_Experimento{numeroExperimento}"),
+                                                           ".hdf5"))
+        
+        generateDataframes <- function(experiment_path, set_path) {
+            
+            lista_imagenes <- list.files(path = glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Imagenes/{set_path}"), 
+                                         pattern = glue::glue("*._Cam1_*"), #"*._cam1_\\d+\\_\\d+\\_\\d+\\_\\d+\\_\\d+\\_\\d+\\.jpeg"
+                                         full.names = TRUE, 
+                                         recursive = T) %>% 
+                tibble::as_tibble() %>% 
+                dplyr::rename(Path = value) %>% 
+                dplyr::mutate(Directorio = glue::glue("{workingFolderName}"),
+                              Caja = glue::glue("{numeroCaja}"),
+                              Experimento = glue::glue("{numeroExperimento}"),
+                              Set = glue::glue("{set_path}"),
+                              Imagen = gsub(glue::glue(".*/|.jpeg.*"), "", Path)) %>% 
+                tidyr::separate(col = Imagen,
+                                into = c("Instrumento", "Contador", "Transformacion", "Camara", "Fecha", "Hora"),
+                                sep = "_",
+                                remove = FALSE) %>% 
+                dplyr::select(Directorio, Caja, Experimento, Set, Instrumento, Contador, Transformacion, Camara, Fecha, Hora, Imagen, Path) %>% 
+                dplyr::group_split(Instrumento)
+        }                              
+        
+        trainDataFramesList <- generateDataframes(experiment_path = experimentFolderName, 
+                                                  set_path = "Train")
+        readr::write_csv(trainDataFramesList %>% dplyr::bind_rows(),
+                  path = glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Documentos/Reporte_Preprocesamiento_Train_Caja{numeroCaja}_Experimento{numeroExperimento}.csv"))
+        
+        valDataFramesList <- generateDataframes(experiment_path = experimentFolderName, 
+                                                set_path = "Validation")
+        readr::write_csv(valDataFramesList %>% dplyr::bind_rows(),
+                  path = glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Documentos/Reporte_Preprocesamiento_Validation_Caja{numeroCaja}_Experimento{numeroExperimento}.csv"))
+        
+        testDataFramesList <- generateDataframes(experiment_path = experimentFolderName, 
+                                                 set_path = "Test")
+        readr::write_csv(testDataFramesList %>% dplyr::bind_rows(),
+                  path = glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Documentos/Reporte_Preprocesamiento_Test_Caja{numeroCaja}_Experimento{numeroExperimento}.csv"))
+        
+        anchorDataFramesList <- generateDataframes(experiment_path = experimentFolderName, 
+                                                 set_path = "Anchors")
+        readr::write_csv(anchorDataFramesList %>% dplyr::bind_rows(),
+                  path = glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Documentos/Reporte_Preprocesamiento_Anchor_Caja{numeroCaja}_Experimento{numeroExperimento}.csv"))
+        
+        preprocess_input <- function(x){
+            
+            x <- magick::image_read(x/255) %>%
+                #     image_edge() %>% 
+                #     image_negate() %>% 
+                magick::image_data('rgb') %>%
+                as.integer() %>%
+                keras::image_to_array() %>%
+                reticulate::array_reshape(c(imageWidth, imageHeight, 3)) #c(224, 224, 3)
+            
+            # x <- image_read(x/255) %>%
+            #     image_edge() %>% 
+            #     image_negate() %>% 
+            #     image_data('gray') %>%  
+            #     as.integer() %>%
+            #     sketch(style = 1,
+            #            lineweight = 2, 
+            #            smooth = 2,
+            #            gain = 0.01,
+            #            contrast =  2,
+            #            shadow = 19) %>% 
+            #     image_read() %>% 
+            #     image_data("rgb") %>% 
+            #     as.integer() %>% 
+            #     image_to_array() %>%
+            #     array_reshape(c(224, 224, 3))
+            
+            return(x/255)
+        }
+        
+        trainDatagen2 <- keras::image_data_generator(preprocessing_function = preprocess_input)
+        
+        
+        
+        trainGeneratorList2 <- list()
+        for (i in 1:number_classes) {
+            trainGenerator2 <- keras::flow_images_from_dataframe(dataframe = trainDataFramesList[[i]],
+                                                          x_col = "Path",
+                                                          y_col = "Instrumento",
+                                                          class_mode = "other",
+                                                          target_size = c(imageWidth, imageHeight), #c(224, 224)
+                                                          generator = trainDatagen2,
+                                                          shuffle = TRUE,
+                                                          batch_size = 1)
+            
+            trainGeneratorList2[i] <- list(trainGenerator2)
+            
+        }
+        # str(trainGeneratorList2) 
+        
+        # plot(as.raster(generator_next(trainGeneratorList2[[4]])[[1]][1,,,]))
+        # generator_next(trainGeneratorList2[[4]])[[2]]
+        
+        valGeneratorList2 <- list()
+        for (i in 1:number_classes) {
+            valGenerator2 <- keras::flow_images_from_dataframe(dataframe = valDataFramesList[[i]],
+                                                        x_col = "Path",
+                                                        y_col = "Instrumento",
+                                                        class_mode = "other",
+                                                        target_size = c(imageWidth, imageHeight), #c(224, 224)
+                                                        generator = trainDatagen2,
+                                                        shuffle = TRUE,
+                                                        batch_size = 1)
+            
+            valGeneratorList2[i] <- list(valGenerator2)
+            
+        }
+        # str(valGeneratorList2) 
+        
+        # plot(as.raster(generator_next(valGeneratorList2[[3]])[[1]][1,,,]))
+        # generator_next(valGeneratorList2[[3]])[[2]]
+        
+        
+        
+        join_generator <- function(generator_list, batch) { 
+            function() { 
+                batch_left <- NULL 
+                batch_right <- NULL 
+                similarity <- NULL 
+                for (i in seq_len(batch)) {  
+                    # front half 
+                    if (i <= ceiling(batch/2)) { # It's suggest to use balance of positive and negative data set, so I divide half is 1(same) and another is 0(differnet).
+                        grp_same <- sample(seq_len(number_classes), 1) 
+                        batch_left <- abind::abind(batch_left, keras::generator_next(generator_list[[grp_same]])[[1]], along = 1) 
+                        batch_right <- abind::abind(batch_right, keras::generator_next(generator_list[[grp_same]])[[1]], along = 1) 
+                        similarity <- c(similarity, 1) # 1 : from the same number
+                        
+                        # after half     
+                    } else {  
+                        grp_diff <- sort(sample(seq_len(number_classes), 2)) 
+                        batch_left <- abind::abind(batch_left, keras::generator_next(generator_list[[grp_diff[1]]])[[1]], along = 1) 
+                        batch_right <- abind::abind(batch_right, keras::generator_next(generator_list[[grp_diff[2]]])[[1]], along = 1) 
+                        similarity <- c(similarity, 0) # 0 : from the differnet number
+                    } 
+                } 
+                return(list(list(batch_left, batch_right), similarity)) 
+            } 
+        }
+        
+        
+        
+        trainJoinGenerator2 <- join_generator(generator_list = trainGeneratorList2, batch = siameseModel_trainBatchSize)
+        # str(trainJoinGenerator2)
+        valJoinGenerator2 <- join_generator(generator_list = valGeneratorList2, batch = siameseModel_validationBatchSize)
+        # str(valJoinGenerator2)
+        
+        
+        trainImagesBatch2 <- trainJoinGenerator2()
+        # par(mfrow = c(3, 1), mai = rep_len(0.01, 4))
+        # for (i in 1:siameseModel_trainBatchSize) {
+        #     # plot(as.raster(trainImagesBatch[[1]][[1]][i,,,]))
+        #     # plot(as.raster(trainImagesBatch[[1]][[2]][i,,,]))
+        #     plot(as.raster(abind(trainImagesBatch2[[1]][[1]][i,,,],
+        #                          trainImagesBatch2[[1]][[2]][i,,,],
+        #                          along = 2)))
+        # }
+        
+        valImagesBatch2 <- valJoinGenerator2()
+        # par(mfrow = c(3, 1), mai = rep_len(0.01, 4))
+        # for (i in 1:siameseModel_validationBatchSize) {
+        #     # plot(as.raster(valImagesBatch[[1]][[1]][i,,,]))
+        #     # plot(as.raster(valImagesBatch[[1]][[2]][i,,,]))
+        #     plot(as.raster(abind(valImagesBatch2[[1]][[1]][i,,,],
+        #                          valImagesBatch2[[1]][[2]][i,,,],
+        #                          along = 2)))
+        # }
+        
+        
+        saveWeightsCheckPointsCallback <- keras::callback_model_checkpoint(filepath = siameseModel_weights_filepath,
+                                                                    monitor = "val_loss",
+                                                                    save_weights_only = TRUE,
+                                                                    mode = "min",
+                                                                    verbose = 1)
+        
+        siameseModel_epochNumber_callback <- keras::callback_lambda(
+            
+            on_epoch_begin = function(epoch, logs) {
+                shinyjs::html("siameseModelEpochNumber",
+                              sprintf("%s %1.f/%1.f %s", "<b>Epoca</b>", epoch + 1, siameseModel_epocas, "<br>")
+                              # add = TRUE
+                )
+            },
+            
+            
+            on_batch_end = function(batch, logs) {
+                
+                batch_steps <- siameseModel_trainSteps
+                
+                
+                shinyjs::html("siameseModelValAccEndBatch",
+                              sprintf("%s %.4f", "<b>Batch Accuracy:</b> ", logs$python_function)
+                              # add = TRUE
+                )
+                
+                shinyjs::html("siameseModelValLossEndBatch",
+                              sprintf("%s %.4f", "<b>Batch Loss:</b> ", logs$loss)
+                              # add = TRUE
+                )
+                
+                shinyjs::html("siameseModelProgressBar",
+                              sprintf("%02.f/%02.f - %s%s%s%s%s%s%s%s%s %s",
+                                      batch + 1, 
+                                      batch_steps,
+                                      "<font color='grey'>0%[</font>",
+                                      "<font color='blue'>",
+                                      paste(replicate(40*((batch + 1)/batch_steps),
+                                                      "="), collapse = ""),
+                                      ">",
+                                      "</font>",
+                                      "<font color='white'>",
+                                      paste(replicate(40*(1 - ((batch + 1)/batch_steps)),
+                                                      "_"), collapse = ""),
+                                      "</font>",
+                                      "<font color='grey'>]100%</font>",
+                                      "<br>")
+                              # add = TRUE
+                )
+                
+            },
+            
+            on_epoch_end = function(epoch, logs) {
+                
+                shinyjs::html("siameseModelValAccMetric",
+                              sprintf("%s %02.f %s %.4f %s",
+                                      "<b>Epoch</b>",
+                                      epoch + 1,
+                                      "<b>Validation Accuracy:</b> ",
+                                      logs$val_python_function,
+                                      "<br>"),
+                              add = TRUE
+                )
+                
+                shinyjs::html("siameseModelValLossMetric",
+                              sprintf("%s %02.f %s %.4f %s",
+                                      "<b>Epoch</b>",
+                                      epoch + 1,
+                                      "<b>Validation Loss:</b> ",
+                                      logs$val_loss,
+                                      "<br>"), 
+                              add = TRUE
+                )
+            }
+        )
+        
+        create_model <- function(embedingSize) {
+            
+            left_input_tensor <- keras::layer_input(shape = c(imageWidth, imageHeight, 3), name = "left_input_tensor") #c(224, 224, 3)
+            right_input_tensor <- keras::layer_input(shape = c(imageWidth, imageHeight, 3), name = "right_input_tensor")#c(224, 224, 3)
+            
+            mob <- keras::application_mobilenet(input_shape = c(imageWidth, imageHeight, 3), include_top = FALSE,  #c(224, 224, 3)
+                                         pooling = "avg")
+            
+            conv_base <- keras::keras_model_sequential() %>%
+                mob() %>%
+                keras::layer_flatten(name = "layerFlatten") %>% 
+                keras::layer_dense(units = 256, activation = "relu", name = "layerDense256") %>%
+                # layer_batch_normalization() %>%
+                # layer_dropout(rate = 0.4) %>%
+                keras::layer_dense(units = 128, activation = "relu", name = "layerDense128") %>%
+                # layer_batch_normalization() %>%
+                # layer_dropout(rate = 0.3) %>%
+                # layer_dense(units = 64, activation = "relu") %>%
+                # layer_batch_normalization() %>%
+                # layer_dropout(rate = 0.2) %>%
+                keras::layer_dense(units = embedingSize,  
+                            activation = "relu", name = "layerDenseEmbedingSize") 
+            
+            left_output_tensor <- left_input_tensor  %>%
+                conv_base
+            
+            right_output_tensor <- right_input_tensor %>%
+                conv_base
+            
+            euclidean_distance <- function(vects) {
+                c(x,y) %<-% vects
+                sum_square <- keras::k_sum(keras::k_square(x - y), axis = as.integer(0), keepdims = TRUE)
+                return(keras::k_sqrt(sum_square))
+            }
+            # euclidean_distance <- function(listxy) {
+            #     x <- listxy$x
+            #     y <- listxy$y
+            #     sum_square <- k_sum(k_square(x - y), axis=1, keepdims=TRUE)
+            #     return(k_sqrt(k_maximum(sum_square, k_epsilon())))
+            # }
+            
+            # eucl_dist_output_shape <- function(shapes) {
+            #     c(shapes1, shapes2) %<-% shapes
+            #     return(list(shape1[[0]][0], 1))
+            # }
+            # eucl_dist_output_shape <- function(listxy) {
+            #     layer1 <- listxy$x
+            #     layer2 <- listxy$y
+            #     return(c(layer1$shape[[2]], 1))
+            # }
+            
+            euclidean_layer <- keras::layer_lambda(object = list(left_output_tensor, right_output_tensor), # To build self define layer, you must use layer_lamda
+                                            f = euclidean_distance,
+                                            # output_shape = eucl_dist_output_shape,
+                                            name = "layerEuclidean", dtype = "float32") # original sin dtype = "float32" 
+            
+            model <- keras::keras_model(list(left_input_tensor, right_input_tensor), euclidean_layer)
+            
+            ContrastiveLoss <- function(y_true, y_pred) { 
+                margin <- 1.2
+                square_pred <- keras::k_square(y_pred)
+                margin_square <- keras::k_square(keras::k_maximum(margin - y_pred, 0))
+                return(keras::k_mean(y_true * square_pred + (1 - y_true) * margin_square))
+            }
+            
+            my_accuracy <- function(y_true, y_pred) {
+                return(keras::k_mean(keras::k_equal(y_true, keras::k_cast(y_pred < 0.5, dtype = "float32"))))
+            }
+            # my_accuracy <- function(y_true, y_pred) {
+            #     return(k_mean(k_equal(y_true, as.numeric(y_pred < 0.5))))
+            # }
+            
+            model %>%
+                keras::compile(loss = ContrastiveLoss,     
+                        optimizer = keras::optimizer_adam(lr = 1e-4),     
+                        metrics = my_accuracy)
+            
+            model
+        }
+        
+        model <- create_model(embedingSize = siameseModel_embedingSize)
+        
+        model %>% keras::fit_generator(trainJoinGenerator2,
+                                steps_per_epoch = siameseModel_trainSteps,                
+                                epochs = siameseModel_epocas,                           
+                                validation_data = valJoinGenerator2,
+                                validation_steps = siameseModel_validationSteps,
+                                callbacks = list(saveWeightsCheckPointsCallback,
+                                                 keras::callback_reduce_lr_on_plateau(factor = 0.05),
+                                                 keras::callback_csv_logger(glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Resultados_Training/Metricas_SModel_ES{siameseModel_embedingSize}_Caja{numeroCaja}_Experimento{numeroExperimento}.csv"), separator = ",", append = FALSE),
+                                                 siameseModel_epochNumber_callback))
+        
+        
+        
+        
+        
+        
+        siameseModel_metricas <- readr::read_csv(glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Resultados_Training/Metricas_SModel_ES{siameseModel_embedingSize}_Caja{numeroCaja}_Experimento{numeroExperimento}.csv"))
+        
+        
+        shinyjs::html("siameseModelEpochNumber", paste(""))
+        shinyjs::html("siameseModelProgressBar", paste(""))
+        shinyjs::html("siameseModelValAccEndBatch", paste(""))
+        shinyjs::html("siameseModelValLossEndBatch", paste(""))
+        shinyjs::html("siameseModelValAccMetric", paste(""))
+        shinyjs::html("siameseModelValLossMetric", paste(""))
+        
+        
+        output$siameseModelMetrics <- DT::renderDataTable({
+            
+            names(siameseModel_metricas) <- c("epoch", "contrastive_loss", "lr", "acc", "val_contrastive_loss", "val_acc")
+            
+            DT::datatable(siameseModel_metricas %>% 
+                              dplyr::mutate_if(is.numeric, round, 4) %>% 
+                              dplyr::select(-epoch),
+                          options = list(lengthMenu = list(c(5, 15, -1), c("5", "15", "All")),
+                                         pageLength = 5))
+        })
+        
+        output$siameseModelMetricsPlot <- shiny::renderPlot({
+            
+            names(siameseModel_metricas) <- c("epoch", "loss", "lr", "acc", "val_loss", "val_acc")
+            plt <- WVPlots::plot_Keras_fit_trajectory(
+                siameseModel_metricas,
+                title = "Performance del Siamese Model por epoca, dataset, y metrica",
+                loss_pretty_name = glue::glue("contrastive_loss"),
+                perf_pretty_name = "acc",
+                perfname = "acc",
+                fliploss = FALSE, 
+                pick_metric = "acc")
+            
+            suppressWarnings(print(plt))
+            
+            ggplot2::ggsave(glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Resultados_Training/Metricas_SModel_ES{siameseModel_embedingSize}_Caja{numeroCaja}_Experimento{numeroExperimento}.png"))
+        })
+        
+        
+        shinyjs::enable(id = "NuevoExperimento")
+        
+        shinyjs::enable(id = "setType")
+        
+        shinyjs::enable(id = "etiqueta")
+        
+        shinyjs::enable(id = "siameseModelTrainBatchSize")
+        shinyjs::enable(id = "siameseModelTrainSteps")
+        shinyjs::enable(id = "siameseModelValidationBatchSize")
+        shinyjs::enable(id = "siameseModelValidationSteps")
+        shinyjs::enable(id = "siameseModelEmbedingSize")
+        shinyjs::enable(id = "siameseModelEpocas")
+        shinyjs::enable(id = "siameseModelTrain")
+        shinyjs::enable(id = "siameseModelBestEpoch")
+        shinyjs::enable(id = "bestSiameseModelWeight")
+        
+        shiny::updateSelectInput(session, 
+                          inputId = "siameseModelBestEpoch",
+                          choices = {1:input$siameseModelEpocas},
+                          selected = NULL)
+    })
+    
+    # 10. CHOOSE BEST SIAMESE_MODEL WEIGHTS EPOCHS AND DELETE THE OTHERS  ----     
+    observeEvent(input$bestSiameseModelWeight, {
+        
+        shinyjs::disable(id = "experimento")
+        shinyjs::disable(id = "CrearExperimento")
+        shinyjs::disable(id = "NuevoExperimento")
+        
+        shinyjs::disable(id = "setType")
+        
+        shinyjs::disable(id = "BurstSnapshot")
+        shinyjs::disable(id = "stop_BurstSnapshot")
+        shinyjs::disable(id = "snapshot")
+        
+        shinyjs::disable(id = "etiqueta")
+        
+        shinyjs::disable(id = "siameseModelTrainBatchSize")
+        shinyjs::disable(id = "siameseModelTrainSteps")
+        shinyjs::disable(id = "siameseModelValidationBatchSize")
+        shinyjs::disable(id = "siameseModelValidationSteps")
+        shinyjs::disable(id = "siameseModelEmbedingSize")
+        shinyjs::disable(id = "siameseModelEpocas")
+        shinyjs::disable(id = "siameseModelTrain")
+        shinyjs::disable(id = "siameseModelBestEpoch")
+        shinyjs::disable(id = "bestSiameseModelWeight")
+        
+        shinyjs::disable(id = "chooseModel")
+        shinyjs::disable(id = "generarModelo")
+        shinyjs::disable(id = "prediction")
+        
+        workingFolderName <- shinyFiles::parseDirPath(volumes, input$WorkingDirectory)
+        numeroCaja <- input$caja
+        numeroExperimento <- input$experimento
+        siameseModel_embedingSize <- input$siameseModelEmbedingSize %>% as.numeric()
+        siameseModel_best_epoch <- input$siameseModelBestEpoch %>% as.numeric() %>% sprintf("%02d", .)
+        # experimentFolderName <- glue("Experimento{numeroExperimento}")
+        
+        for (i in 1:length(siameseModel_best_epoch)) {
+            
+            saveDate <- format(Sys.time(), "%d-%m-%Y_%Hh%Mm%Ss")
+            siameseModel_best_weigths <- glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Modelos/SModel_Weights_ES{siameseModel_embedingSize}_E{siameseModel_best_epoch[i]}_Caja{numeroCaja}_Experimento{numeroExperimento}.hdf5")
+            
+            file.rename(from = siameseModel_best_weigths, to = glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Modelos/SModel_ES{siameseModel_embedingSize}_E{siameseModel_best_epoch[i]}_Caja{numeroCaja}_Experimento{numeroExperimento}_{saveDate}.hdf5"))
+            
+        }
+        
+        filesToRemove <- list.files(glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Modelos/"), 
+                                    pattern = glue::glue("SModel_Weights_ES{siameseModel_embedingSize}_"), 
+                                    full.names = TRUE)
+        file.remove(filesToRemove)
+        
+        shinyjs::enable(id = "NuevoExperimento")
+        
+        shinyjs::enable(id = "setType")
+        
+        shinyjs::enable(id = "etiqueta")
+        
+        shinyjs::enable(id = "siameseModelTrainBatchSize")
+        shinyjs::enable(id = "siameseModelTrainSteps")
+        shinyjs::enable(id = "siameseModelValidationBatchSize")
+        shinyjs::enable(id = "siameseModelValidationSteps")
+        shinyjs::enable(id = "siameseModelEmbedingSize")
+        shinyjs::enable(id = "siameseModelEpocas")
+        shinyjs::enable(id = "siameseModelTrain")
+        shinyjs::enable(id = "siameseModelBestEpoch")
+        shinyjs::enable(id = "bestSiameseModelWeight")
+        
+        shinyjs::enable(id = "chooseModel")
+        # enable(id = "generarModelo")
+        # enable(id = "prediction")
+        
+        shinyjs::enable(id = "chooseSiameseModel")
+        # enable(id = "generarSiameseModelo")
+        # enable(id = "predictionSiamese")
+        
+    })
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    # 15. CONECTAR ARDUINO ----
     # Observe ports ----
     observeEvent(input$ports, {
         
@@ -811,7 +1891,7 @@ app_server <- function(input, output, session ) {
         shinyjs::enable(id = "chooseProductionModel")
     })
     
-    # 10. INFERENCE SIAMESE MODEL ----
+    # 16. INFERENCE SIAMESE MODEL ----
     # Observe generarProductionModel ----
     observeEvent(input$generarProductionModel, {
         
@@ -980,11 +2060,12 @@ app_server <- function(input, output, session ) {
                 
                 # set <- "live"
                 
-                anchors_path <- glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Documentos/Reporte_Preprocesamiento_Caja{numeroCaja}_Experimento{numeroExperimento}.csv")
+                anchors_path <- glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Documentos/Reporte_Preprocesamiento_Anchor_Caja{numeroCaja}_Experimento{numeroExperimento}.csv")
                 print(anchors_path)
                 
                 anchorsDataFramesList <- readr::read_csv(anchors_path) %>%
-                    dplyr::filter(Set == "Anchor") %>%
+                    dplyr::filter(Set == "Anchors") %>%
+                    dplyr::filter(Transformacion == "Brightness100") %>%
                     dplyr::select(Instrumento, Path)
                 
                 # Funcion de Disimilaridad inferenceSnapshot ----
@@ -1664,11 +2745,12 @@ app_server <- function(input, output, session ) {
             
             # set <- "Live"
             
-            anchors_path <- glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Documentos/Reporte_Preprocesamiento_Caja{numeroCaja}_Experimento{numeroExperimento}.csv")
+            anchors_path <- glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Documentos/Reporte_Preprocesamiento_Anchor_Caja{numeroCaja}_Experimento{numeroExperimento}.csv")
             print(anchors_path)
             
             anchorsDataFramesList <- readr::read_csv(anchors_path) %>%
-                dplyr::filter(Set == "Anchor") %>%
+                dplyr::filter(Set == "Anchors") %>%
+                dplyr::filter(Transformacion == "Brightness100") %>%
                 dplyr::select(Instrumento, Path)
             # %>%
             #     mutate(Path = gsub(".*/Caja", "", Path))

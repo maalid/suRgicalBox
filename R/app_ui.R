@@ -263,7 +263,7 @@ app_ui <- function(request) {
                                            shiny::sidebarLayout(
                                                
                                                # Sidebar Panel ----
-                                               shiny::sidebarPanel(width = 4,
+                                               shiny::sidebarPanel(width = 3,
                                                                    
                                                                    # Boton para elegir directorio de trabajo ----
                                                                    div(style = "width: 250px;
@@ -392,78 +392,78 @@ app_ui <- function(request) {
                                                                    
                                                                    hr(style = "box-shadow: 2px 2px 2px blue;"),
                                                                    
-                                                                   # Botones para escoger typeSet ----
-                                                                   div(align = "center",
-                                                                       
-                                                                       shinyjs::disabled(shiny::radioButtons(inputId = "setType",  # shiny::radioButtons
-                                                                                                             label = "Set",
-                                                                                                             inline = TRUE,
-                                                                                                             choices = c("Entrenamiento" = "Train_Raw",
-                                                                                                                         "Validacion" = "Validation_Raw",
-                                                                                                                         "Test" = "Test_Raw",
-                                                                                                                         "Anchors" = "Anchors_Raw")
-                                                                       )
-                                                                       )
-                                                                   ),
+                                                                   # # Botones para escoger typeSet ----
+                                                                   # div(align = "center",
+                                                                   #     
+                                                                   #     shinyjs::disabled(shiny::radioButtons(inputId = "setType",  # shiny::radioButtons
+                                                                   #                                           label = "Set",
+                                                                   #                                           inline = TRUE,
+                                                                   #                                           choices = c("Entrenamiento" = "Train_Raw",
+                                                                   #                                                       "Validacion" = "Validation_Raw",
+                                                                   #                                                       "Test" = "Test_Raw",
+                                                                   #                                                       "Anchors" = "Anchors_Raw")
+                                                                   #     )
+                                                                   #     )
+                                                                   # ),
                                                                    
                                                                    hr(style = "box-shadow: 2px 2px 2px blue;"),
                                                                    
-                                                                   # Boton para tomar Burst-Snapshot ----
-                                                                   div(br(style = "line-height: 200px;"),
-                                                                       
-                                                                       align = "center",
-                                                                       
-                                                                       shinyjs::disabled(shiny::actionButton(inputId = "BurstSnapshot",
-                                                                                                             label = "",
-                                                                                                             style = "background-color: black;
-                                                                                 font-family: sans serif;
-                                                                                 font-size: 35px;
-                                                                                 color: white;
-                                                                                 box-shadow: 5px 5px 5px grey;
-                                                                                 border-radius: 15px",
-                                                                                 icon = icon("images"),
-                                                                                 size = "lg",
-                                                                                 onclick = "start_snapping()")),
-                                                                       
-                                                                       
-                                                                       span(style = "font-size: 13px;
-                                                color: black;
-                                                text-shadow: 2px 2px 5px black;",
-                                                " -- "),
-                                                
-                                                # Boton para parar Burst-Snapshot ----
-                                                shinyjs::disabled(shiny::actionButton(inputId = "stop_BurstSnapshot",
-                                                                                      label = "",
-                                                                                      style = "background-color: red;
-                                                                                 font-family: sans serif;
-                                                                                 font-size: 20px;
-                                                                                 color: white;
-                                                                                 box-shadow: 5px 5px 5px grey;
-                                                                                 border-radius: 10px",
-                                                                                 icon = icon("stop"),
-                                                                                 size = "sm",
-                                                                                 onclick = "stop_snapping()")
-                                                )
-                                                                   ),
-                                                
-                                                
-                                                
-                                                # Boton para tomar Single-Snapshot ----
-                                                div(br(style = "line-height: 200px;"),
-                                                    align = "center",
-                                                    shinyjs::disabled(shiny::actionButton(inputId = "snapshot",
-                                                                                          label = "",
-                                                                                          style = "background-color: black;
-                                                                                 font-family: sans serif;
-                                                                                 font-size: 35px;
-                                                                                 color: white;
-                                                                                 box-shadow: 5px 5px 5px grey;
-                                                                                 border-radius: 15px",
-                                                                                 icon = icon("camera"),
-                                                                                 size = "lg",
-                                                                                 onclick = "take_snapshot()")
-                                                    )
-                                                ),
+                                                #                    # Boton para tomar Burst-Snapshot ----
+                                                #                    div(br(style = "line-height: 200px;"),
+                                                #                        
+                                                #                        align = "center",
+                                                #                        
+                                                #                        shinyjs::disabled(shiny::actionButton(inputId = "BurstSnapshot",
+                                                #                                                              label = "",
+                                                #                                                              style = "background-color: black;
+                                                #                                  font-family: sans serif;
+                                                #                                  font-size: 35px;
+                                                #                                  color: white;
+                                                #                                  box-shadow: 5px 5px 5px grey;
+                                                #                                  border-radius: 15px",
+                                                #                                  icon = icon("images"),
+                                                #                                  size = "lg",
+                                                #                                  onclick = "start_snapping()")),
+                                                #                        
+                                                #                        
+                                                #                        span(style = "font-size: 13px;
+                                                # color: black;
+                                                # text-shadow: 2px 2px 5px black;",
+                                                # " -- "),
+                                                # 
+                                                # # Boton para parar Burst-Snapshot ----
+                                                # shinyjs::disabled(shiny::actionButton(inputId = "stop_BurstSnapshot",
+                                                #                                       label = "",
+                                                #                                       style = "background-color: red;
+                                                #                                  font-family: sans serif;
+                                                #                                  font-size: 20px;
+                                                #                                  color: white;
+                                                #                                  box-shadow: 5px 5px 5px grey;
+                                                #                                  border-radius: 10px",
+                                                #                                  icon = icon("stop"),
+                                                #                                  size = "sm",
+                                                #                                  onclick = "stop_snapping()")
+                                                # )
+                                                #                    ),
+                                                # 
+                                                # 
+                                                # 
+                                                # # Boton para tomar Single-Snapshot ----
+                                                # div(br(style = "line-height: 200px;"),
+                                                #     align = "center",
+                                                #     shinyjs::disabled(shiny::actionButton(inputId = "snapshot",
+                                                #                                           label = "",
+                                                #                                           style = "background-color: black;
+                                                #                                  font-family: sans serif;
+                                                #                                  font-size: 35px;
+                                                #                                  color: white;
+                                                #                                  box-shadow: 5px 5px 5px grey;
+                                                #                                  border-radius: 15px",
+                                                #                                  icon = icon("camera"),
+                                                #                                  size = "lg",
+                                                #                                  onclick = "take_snapshot()")
+                                                #     )
+                                                # ),
                                                 
                                                 hr(style = "box-shadow: 2px 2px 2px blue;"),
                                                 
@@ -486,7 +486,7 @@ app_ui <- function(request) {
                                                     shiny::textAreaInput(inputId = "annotations",
                                                                          label = "Anotaciones",
                                                                          value = "",
-                                                                         width = '500px',
+                                                                         width = '300px',
                                                                          height = '150px',
                                                                          placeholder = "Escriba aca sus anotaciones"),
                                                 )
@@ -507,16 +507,29 @@ app_ui <- function(request) {
                                                          
                                                          align = "center",
                                                          
+                                                         div(style = "height:280px;
+                                                    width:550px;",
+                                                         
                                                          # Boton para encender-apagar camara 1 ----
-                                                         shinyWidgets::switchInput(inputId = "OnOffCam1",
+                                                         div(style = "display: inline-block;
+                                                             height:270px;
+                                                    width:250px;",
+                                                             
+                                                         
+                                                    div(style = "height:20px;
+                                                    width:250px;",
+                                                                 shinyWidgets::switchInput(inputId = "OnOffCam1",
                                                                                    # label = "On-Off Camara 1",
                                                                                    onStatus = NULL,
                                                                                    offStatus = NULL,
                                                                                    size = "mini",
                                                                                    inline = TRUE),
+                                                             
+                                                             
                                                          
                                                          # Boton para settings camara 1 ----
-                                                         actionButton(inputId = "cam1Settings",
+                                                         
+                                                             actionButton(inputId = "cam1Settings",
                                                                       label = "",
                                                                       style = "background-color: transparent;
                                                                  border-color: transparent;
@@ -525,24 +538,32 @@ app_ui <- function(request) {
                                                                  color: white;
                                                                  border-radius: 5px",
                                                                  icon = icon("sliders"),
-                                                                 size = "sm"),
+                                                                 size = "sm")),
+                                                         
                                                          
                                                          # Lugar para mostrar la imagen de la camara 1 ----
-                                                         div(style = "border-radius: 25px;
-                                                        height: 215px;
-                                                        width: 235px;",
-                                                        uiOutput("cam1")),
+                                                         div(style = "height:250px;
+                                                    width:250px;",
+                                                        uiOutput("cam1", inline = TRUE))),
                                                         
                                                         # Boton para encender-apagar camara 2 ----
-                                                        shinyWidgets::switchInput(inputId = "OnOffCam2",
+                                                    div(style = "display: inline-block;
+                                                        height:270px;
+                                                    width:250px;",
+                                                        
+                                                    div(style = "height:20px;
+                                                    width:250px;",
+                                                                shinyWidgets::switchInput(inputId = "OnOffCam2",
                                                                                   # label = "On-Off Camara 2",
                                                                                   onStatus = NULL,
                                                                                   offStatus = NULL,
                                                                                   size = "mini",
                                                                                   inline = TRUE),
+                                                            
                                                         
                                                         # Boton para settings camara 2 ----
-                                                        actionButton(inputId = "cam2Settings",
+                                                        
+                                                            actionButton(inputId = "cam2Settings",
                                                                      label = "",
                                                                      style = "background-color: transparent;
                                                                  border-color: transparent;
@@ -551,13 +572,17 @@ app_ui <- function(request) {
                                                                  color: white;
                                                                  border-radius: 5px",
                                                                  icon = icon("sliders"),
-                                                                 size = "sm"),
+                                                                 size = "sm")),
+                                                        
                                                         
                                                         # Lugar para mostrar la imagen de la camara 2 ----
-                                                        div(style = "border-radius: 25px;
-                                                        height: 215px;
-                                                        width: 235px;",
-                                                        uiOutput("cam2")),
+                                                    div(style = "height:250px;
+                                                    width:250px;",
+                                                        uiOutput("cam2", inline = TRUE)))
+                                                    
+                                                    ),
+                                                        
+                                                        # br(),
                                                         
                                                         # Campo para ingresar la etiqueta ----
                                                         div(align = "center",
@@ -574,11 +599,11 @@ app_ui <- function(request) {
                                                         )
                                                         ),
                                                         
-                                                        tags$style(type = "text/css",
-                                                                   "#etiqueta {text-align:center;
-                                                                      font-family: sans serif;
-                                                                      font-style: italic;
-                                                                      display: block;}")
+                                                        # tags$style(type = "text/css",
+                                                        #            "#etiqueta {text-align:center;
+                                                        #               font-family: sans serif;
+                                                        #               font-style: italic;
+                                                        #               display: block;}")
                                                         ),
                                                         
                                                         # Contador para Single-Snapshot y Burst-Snapshot ----
@@ -596,9 +621,85 @@ app_ui <- function(request) {
                                                                           background: white;
                                                                           border-radius: 5px}")
                                                         ),
+                                                    
+                                                    br(),
                                                         
-                                                        style = "height:710px;
-                                                    width:290px;
+                                                        # Botones para escoger typeSet ----
+                                                        div(align = "center",
+                                                            style = "color: black;
+                                                            font-style: bold;
+                                                        font-family: sans serif;
+                                                        text-shadow: 2px 2px 3px white;",
+                                                            shinyjs::disabled(shiny::radioButtons(inputId = "setType",  # shiny::radioButtons
+                                                                                                  label = NULL,
+                                                                                                  inline = TRUE,
+                                                                                                  choices = c("Entrenamiento" = "Train_Raw",
+                                                                                                              "Validacion" = "Validation_Raw",
+                                                                                                              "Test" = "Test_Raw",
+                                                                                                              "Anchors" = "Anchors_Raw")
+                                                            )
+                                                            )
+                                                        ),
+                                                        
+                                                        # Boton para tomar Burst-Snapshot ----
+                                                        div(br(style = "line-height: 200px;"),
+                                                            
+                                                            align = "center",
+                                                            
+                                                            shinyjs::disabled(shiny::actionButton(inputId = "BurstSnapshot",
+                                                                                                  label = "",
+                                                                                                  style = "background-color: black;
+                                                                                 font-family: sans serif;
+                                                                                 font-size: 35px;
+                                                                                 color: white;
+                                                                                 box-shadow: 5px 5px 5px grey;
+                                                                                 border-radius: 15px",
+                                                                                 icon = icon("images"),
+                                                                                 size = "lg",
+                                                                                 onclick = "start_snapping()")),
+                                                            
+                                                            
+                                                            span(style = "font-size: 13px;
+                                                color: black;
+                                                text-shadow: 2px 2px 5px black;",
+                                                " -- "),
+                                                
+                                                # Boton para parar Burst-Snapshot ----
+                                                shinyjs::disabled(shiny::actionButton(inputId = "stop_BurstSnapshot",
+                                                                                      label = "",
+                                                                                      style = "background-color: red;
+                                                                                 font-family: sans serif;
+                                                                                 font-size: 20px;
+                                                                                 color: white;
+                                                                                 box-shadow: 5px 5px 5px grey;
+                                                                                 border-radius: 10px",
+                                                                                 icon = icon("stop"),
+                                                                                 size = "sm",
+                                                                                 onclick = "stop_snapping()")
+                                                )
+                                                        ),
+                                                
+                                                
+                                                
+                                                # Boton para tomar Single-Snapshot ----
+                                                div(br(style = "line-height: 200px;"),
+                                                    align = "center",
+                                                    shinyjs::disabled(shiny::actionButton(inputId = "snapshot",
+                                                                                          label = "",
+                                                                                          style = "background-color: black;
+                                                                                 font-family: sans serif;
+                                                                                 font-size: 35px;
+                                                                                 color: white;
+                                                                                 box-shadow: 5px 5px 5px grey;
+                                                                                 border-radius: 15px",
+                                                                                 icon = icon("camera"),
+                                                                                 size = "lg",
+                                                                                 onclick = "take_snapshot()")
+                                                    )
+                                                ),
+                                                        
+                                                        style = "height:720px;
+                                                    width:550px;
                                                     background-image: linear-gradient(#000000, #b4b4b4);"
                                                     
                                                                  ),
@@ -613,8 +714,11 @@ app_ui <- function(request) {
                                                    ),
                                                    
                                                    # Columna derecha App ----
-                                                   shiny::column(width = 6,
+                                                   shiny::column(width = 4,
+                                                                 offset = 2,
                                                                  
+                                                                 br(),
+                                                                 br(),
                                                                  br(),
                                                                  br(),
                                                                  
@@ -649,17 +753,21 @@ app_ui <- function(request) {
                                                                      style = "box-shadow: 5px 5px 5px grey;
                                                 border-radius: 25px;
                                                 height: 580px;
+                                                width : 400px;
                                                 background-image: linear-gradient(#000000, #b4b4b4);",
                                                 align = "center",
                                                 div(shiny::textOutput(outputId = "labelImagenCam1"),
                                                     tags$style("#labelImagenCam1 {text-align: center;
                                                                          color: white;
                                                                          font-family: sans serif;
-                                                                         font-size: 15px;
-                                                                         max-height: 20px;
-                                                                         max-width: 700px;}")),
+                                                                         font-size: 13px;
+                                                                         font-weight: bold;
+                                                                         max-height: 50px;
+                                                                         max-width: 380px;}")),
                                                 
                                                 br(style = "line-height: 12px;"),
+                                                
+                                                
                                                 
                                                 shiny::plotOutput(outputId = "imagenCam1",
                                                                   width = "224px",
@@ -672,9 +780,10 @@ app_ui <- function(request) {
                                                     tags$style("#labelImagenCam2 {text-align: center;
                                                                          color: white;
                                                                          font-family: sans serif;
-                                                                         font-size: 15px;
-                                                                         max-height: 20px;
-                                                                         max-width: 700px;}")),
+                                                                         font-size: 13px;
+                                                                         font-weight: bold;
+                                                                         max-height: 50px;
+                                                                         max-width: 380px;}")),
                                                 
                                                 br(style = "line-height: 12px;"),
                                                 
@@ -690,12 +799,206 @@ app_ui <- function(request) {
                                            ) # end sidebarLayout
                            ), # end TAB 1: captura de imagenes
                            
+                           
+                           # TAB 2: Siamese Model ----
+                           tabPanel("Entrenamiento",
+                                    
+                                    sidebarLayout(
+                                        
+                                        sidebarPanel(width = 3,
+                                                     
+                                            # Campo para ingresar el batch size de entrenamiento ----
+                                            div(style = "width: 270px;
+                                                         font: bold 16px 'Helvetica Neue', Helvetica, Arial, sans-serif;",
+                                                "Batch Size Entrenamiento"),
+                                            
+                                            div(style = "display: inline-block;
+                                                         vertical-align:top;
+                                                         width: 170px;",
+                                                shinyjs::disabled(selectizeInput(inputId = "siameseModelTrainBatchSize",
+                                                                                 label = NULL,
+                                                                                 choices = 20,
+                                                                                 width = '100%')),
+                                                tags$style("#siameseModelTrainBatchSize {border-radius: 5px}")),
+                                            
+                                            # Campo para ingresar el step size de entrenamiento ----
+                                            div(style = "width: 270px;
+                                                         font: bold 16px 'Helvetica Neue', Helvetica, Arial, sans-serif;",
+                                               "Step Size Entrenamiento"),
+                                            
+                                            div(style = "display: inline-block;
+                                                         vertical-align:top;
+                                                         width: 170px;",
+                                                shinyjs::disabled(numericInput(inputId = "siameseModelTrainSteps",
+                                                                               label = NULL,
+                                                                               value = 32,
+                                                                               min = 3,
+                                                                               width = "170px")),
+                                                tags$style("#siameseModelTrainSteps {border-radius: 5px}")),
+                                            
+                                            hr(style = "box-shadow: 2px 2px 2px blue;"),
+                                            
+                                            # Campo para ingresar el batch size de validacion ----
+                                            div(style = "width: 270px;
+                                                         font: bold 16px 'Helvetica Neue', Helvetica, Arial, sans-serif;",
+                                                "Batch Size Validacion"),
+                                            
+                                            div(style = "display: inline-block;
+                                                         vertical-align:top;
+                                                         width: 170px;",
+                                                shinyjs::disabled(selectizeInput(inputId = "siameseModelValidationBatchSize",
+                                                                                 label = NULL,
+                                                                                 choices = 20,
+                                                                                 width = '100%')),
+                                                tags$style("#siameseModelValidationBatchSize {border-radius: 5px}")),
+                                            
+                                            
+                                            # Campo para ingresar el step size de validacion ----
+                                            div(style = "width: 270px;
+                                                         font: bold 16px 'Helvetica Neue', Helvetica, Arial, sans-serif;",
+                                                "Step Size Validacion"),
+                                            
+                                            div(style = "display: inline-block;
+                                                         vertical-align:top;
+                                                         width: 170px;",
+                                                shinyjs::disabled(numericInput(inputId = "siameseModelValidationSteps",
+                                                                               label = NULL,
+                                                                               value = 32,
+                                                                               min = 3,
+                                                                               width = "170px")),
+                                                tags$style("#siameseModelValidationSteps {border-radius: 5px}")),
+                                            
+                                            hr(style = "box-shadow: 2px 2px 2px blue;"),
+                                            
+                                            # Campo para ingresar embeding size ----
+                                            div(style = "width: 270px;
+                                                         font: bold 16px 'Helvetica Neue', Helvetica, Arial, sans-serif;",
+                                                "Embeding Size Modelo"),
+                                            
+                                            div(style = "display: inline-block;
+                                                         vertical-align:top;
+                                                         width: 170px;",
+                                                shinyjs::disabled(numericInput(inputId = "siameseModelEmbedingSize",
+                                                                               label = NULL,
+                                                                               value = 82,
+                                                                               min = 3,
+                                                                               width = "170px")),
+                                                tags$style("#siameseModelEmbedingSize {border-radius: 5px}")),
+                                            
+                                            # Campo para ingresar la cantidad de epocas ----
+                                            div(style = "width: 270px;
+                                                        font: bold 16px 'Helvetica Neue', Helvetica, Arial, sans-serif;",
+                                                "Cantidad de Epocas"),
+                                            
+                                            div(style = "display: inline-block;
+                                                         vertical-align:top;
+                                                         width: 170px;",
+                                                shinyjs::disabled(numericInput(inputId = "siameseModelEpocas",
+                                                                               label = NULL,
+                                                                               value = 15,
+                                                                               min = 3,
+                                                                               width = "170px")),
+                                                tags$style("#siameseModelEpocas {border-radius: 5px}")),
+                                            
+                                            # Boton para entrenar modelo siamese ----
+                                            div(style = "display: inline-block;
+                                                         vertical-align:top;
+                                                         width: 75px;",
+                                                shinyjs::disabled(actionButton(inputId = "siameseModelTrain",
+                                                                               label = "Entrenar",
+                                                                               size = "lg")),
+                                                tags$style("#siameseModelTrain {background-color: black;
+                                                                                font-family: sans serif;
+                                                                                font-size: 15px;
+                                                                                color: white;
+                                                                                box-shadow: 5px 5px 5px grey;
+                                                                                border-radius: 5px}")),
+                                            
+                                            hr(style = "box-shadow: 2px 2px 2px blue;"),
+                                            hr(style = "box-shadow: 2px 2px 2px blue;"),
+                                            hr(style = "box-shadow: 2px 2px 2px blue;"),
+                                            
+                                            # Campo para ingresar la epoca del mejor modelo ----
+                                            div(style = "width: 270px;
+                                                         font: bold 16px 'Helvetica Neue', Helvetica, Arial, sans-serif;",
+                                                "Mejor Epoca"),
+                                            
+                                            div(style = "display: inline-block;
+                                                         vertical-align:top;
+                                                         width: 170px;",
+                                                shinyjs::disabled(selectizeInput(inputId = "siameseModelBestEpoch",
+                                                                                 label = NULL,
+                                                                                 choices = 1,
+                                                                                 multiple = TRUE,
+                                                                                 width = '100%')),
+                                                tags$style("#siameseModelBestEpoch {border-radius: 5px;}")),
+                                            
+                                            # Boton para guardar mejor modelo siamese ----
+                                            div(style = "display: inline-block;
+                                                         vertical-align:top;
+                                                         width: 75px;",
+                                                shinyjs::disabled(actionButton(inputId = "bestSiameseModelWeight",
+                                                                               label = "Guardar",
+                                                                               size = "lg")),
+                                                tags$style("#bestSiameseModelWeight {background-color: black;
+                                                                                     font-family: sans serif;
+                                                                                     font-size: 15px;
+                                                                                     color: white;
+                                                                                     box-shadow: 5px 5px 5px grey;
+                                                                                     border-radius: 5px}"))
+                                            
+                                        ),
+                                        mainPanel(
+                                            # Metricas de performance del modelo ----
+                                            textOutput(outputId = "siameseModelEpochNumber"),
+                                            # textOutput(outputId = "siameseModelAccBeginEpoch"),
+                                            
+                                            # br(),
+                                            
+                                            # textOutput(outputId = "siameseModelStepNumber"),
+                                            # textOutput(outputId = "siameseModelAccBeginBatch"),
+                                            textOutput(outputId = "siameseModelProgressBar"),
+                                            #
+                                            br(),
+                                            
+                                            textOutput(outputId = "siameseModelValAccEndBatch"),
+                                            textOutput(outputId = "siameseModelValLossEndBatch"),
+                                            
+                                            br(),
+                                            
+                                            # textOutput(outputId = "siameseModelAccEndEpoch"),
+                                            textOutput(outputId = "siameseModelValAccMetric"),
+                                            
+                                            br(),
+                                            
+                                            textOutput(outputId = "siameseModelValLossMetric"),
+                                            
+                                            br(),
+                                            br(),
+                                            
+                                            DT::dataTableOutput(outputId = "siameseModelMetrics"),  #tableOutput
+                                            
+                                            br(),
+                                            br(),
+                                            
+                                            plotOutput(outputId = "siameseModelMetricsPlot")
+                                        )
+                                    )),
+                           
+                           
+                           
+                           
+                           
+                           
+                           
                            # TAB 4: Inferencia ----
                            shiny::tabPanel("Inferencia",
                                            
                                            sidebarLayout(
                                                
-                                               sidebarPanel(width = 4,
+                                                sidebarPanel(width = 3,
+                                                             
+                                                             
                                                             
                                                             # Coneccion con arduino ----
                                                             div(style = "width: 170px;
@@ -780,6 +1083,8 @@ app_ui <- function(request) {
                                                                                  border-radius: 5px}")),
                                                      
                                                      hr(style = "box-shadow: 2px 2px 2px blue;"),
+                                                     hr(style = "box-shadow: 2px 2px 2px blue;"),
+                                                     hr(style = "box-shadow: 2px 2px 2px blue;"),
                                                      
                                                      # Campo para ingresar imagen para inferencia en vivo ----
                                                      div(style = "width: 170px;
@@ -824,8 +1129,8 @@ app_ui <- function(request) {
                                                           
                                                           br(),
                                                           br(),
-                                                          br(),
-                                                          br(),
+                                                          # br(),
+                                                          # br(),
                                                           
                                                           div(style = "box-shadow: 5px 5px 5px grey;
                                                     border-radius: 25px;
@@ -910,9 +1215,9 @@ app_ui <- function(request) {
                                                    
                                                    column(width = 6,
                                                           
-                                                          br(),
-                                                          br(),
-                                                          
+                                                          # br(),
+                                                          # br(),
+                                                          # 
                                                           
                                                           shinyjs::hidden(textInput(inputId = 'InferenceImagePlaceholder64',
                                                                                     label = '',
@@ -940,7 +1245,7 @@ app_ui <- function(request) {
                                                         br(style = "line-height: 6px;"),
                                                         textOutput(outputId = "labelLiveImagenCam1"),
                                                         tags$style("#labelLiveImagenCam1 {text-align: center;
-                                                                                 color: black;
+                                                                                 color: white;
                                                                                  font-family: sans serif;
                                                                                  font-size: 13px;
                                                                                  font-weight: bold;
@@ -962,14 +1267,14 @@ app_ui <- function(request) {
                            
                            
                            
-                           # TAB 2: Boton cerrar ventana y cerar sesion de R ----
+                           # TAB 5: Boton cerrar ventana y cerar sesion de R ----
                            shiny::tabPanel(title = "", value = "Stop", icon = icon("power-off")),
                            
                            
                            # Layout pestagnas ----
                            tags$head(
                                tags$style(HTML(".navbar-nav {float: none !important;}
-                                    .navbar-nav > li:nth-child(3) {float: right;}")))
+                                    .navbar-nav > li:nth-child(4) {float: right;}")))
                            
          ) # end navbarPage
         ) # end fluidPage
