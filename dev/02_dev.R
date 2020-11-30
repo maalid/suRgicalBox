@@ -31,6 +31,9 @@ usethis::use_package( "forcats" )
 usethis::use_package( "ggplot2" )
 usethis::use_package( "reshape2" )
 usethis::use_package( "shinymanager" )
+usethis::use_package( "WVPlots" )
+usethis::use_package( "abind" )
+
     
     
 # ## Add modules ----
