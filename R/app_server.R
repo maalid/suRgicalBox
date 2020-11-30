@@ -13,6 +13,7 @@ app_server <- function(input, output, session ) {
         # numeroCaja =  NULL,
         inventario_df = NULL,
         inventario_parcial = tibble::tibble(),
+        inferenceModel = NULL,
         conn = NULL,
         productionModel = NULL
     )
@@ -39,7 +40,7 @@ app_server <- function(input, output, session ) {
     #     if (is.null(input$shinymanager_where) || (!is.null(input$shinymanager_where) && input$shinymanager_where %in% "application")) {
     #         ######## shinymanager
     
-    # 1. WEBCAMS ----
+# 1. WEBCAMS ----
     # CAPTURE WEBCAM1 SETTINGS ----
     # Observe cam1Settings ----
     observeEvent(input$cam1Settings, {
@@ -178,7 +179,7 @@ app_server <- function(input, output, session ) {
         } else {output$InferenceWebCam1 <- renderUI({InferenceWebCam1Off()})}
     })
     
-    # 2. FOLDERS ----
+# 2. FOLDERS ----
     # FOLDER DIRECTORIO DE TRABAJO ----
     volumes <- c(Home = fs::path_home(), "R Installation" = R.home(), shinyFiles::getVolumes()())
     shinyFiles::shinyDirChoose(input, "WorkingDirectory", roots = volumes, session = session, restrictions = system.file(package = "base"))
@@ -384,6 +385,8 @@ app_server <- function(input, output, session ) {
             shinyjs::enable(id = "siameseModelEmbedingSize")
             shinyjs::enable(id = "siameseModelEpocas")
             shinyjs::enable(id = "siameseModelTrain")
+            
+            shinyjs::enable(id = "chooseSiameseModel")
         
             shinyjs::enable(id = "ports")
             
@@ -421,7 +424,7 @@ app_server <- function(input, output, session ) {
         
     })
     
-    # 4. NUEVA CAJA & EXPERIMENTO ----
+# 3. NUEVA CAJA & EXPERIMENTO ----
     # CREAR NUEVA CAJA ----
     observeEvent(input$NuevaCaja, {
         
@@ -455,6 +458,10 @@ app_server <- function(input, output, session ) {
         shinyjs::disable(id = "siameseModelTrain")
         shinyjs::disable(id = "siameseModelBestEpoch")
         shinyjs::disable(id = "bestSiameseModelWeight")
+        
+        shinyjs::disable(id = "chooseSiameseModel")
+        shinyjs::disable(id = "generarSiameseModelo")
+        shinyjs::disable(id = "predictionSiamese")
         
         # Resetear contador
         counter(1)
@@ -520,6 +527,10 @@ app_server <- function(input, output, session ) {
         shinyjs::disable(id = "siameseModelBestEpoch")
         shinyjs::disable(id = "bestSiameseModelWeight")
         
+        shinyjs::disable(id = "chooseSiameseModel")
+        shinyjs::disable(id = "generarSiameseModelo")
+        shinyjs::disable(id = "predictionSiamese")
+        
         # Resetear contador
         counter(1)
         
@@ -550,7 +561,7 @@ app_server <- function(input, output, session ) {
         
     })
     
-    # 5. ACTUALIZACION BOTONES ----
+# 4. ACTUALIZACION BOTONES ----
     # HABILITAR O DESHABILITAR BOTONES ----
     observe({
         
@@ -568,6 +579,9 @@ app_server <- function(input, output, session ) {
         
         shinyjs::toggleState(id = "snapshot",
                              condition = {nchar(input$etiqueta) > 0 & OnOffCam1Value == "TRUE" & OnOffCam2Value == "TRUE"} )
+        
+        shinyjs::toggleState(id = "generarSiameseModelo", 
+                    condition = !is.null(input$chooseSiameseModel))
         
         shinyjs::toggleState(id = "connectArduino",
                              condition = !is.null(input$COM))
@@ -641,7 +655,7 @@ app_server <- function(input, output, session ) {
         shiny::updateSelectInput(session, inputId = "setType", selected = "Train_Raw") # updateSelectInput
     })
     
-    # 6. CONTADORES ----
+# 5. CONTADORES ----
     # CREAR E INICIALIZAR CONTADOR DE SNAPSHOTS ----
     counter <- reactiveVal(1)
     output$photoCounter <- renderText({counter()})
@@ -649,7 +663,7 @@ app_server <- function(input, output, session ) {
     liveCounter <- reactiveVal(1)
     output$livePhotoCounter <- renderText({liveCounter()})
     
-    # 7. CAPTURA IMAGENES ----
+# 6. CAPTURA IMAGENES ----
     # CAPTURAR IMAGENES EN MODO SINGLE-SNAPSHOT ----
     observeEvent(input$snapshot, {
         
@@ -1269,7 +1283,7 @@ app_server <- function(input, output, session ) {
         }
     })
     
-    # 8. ANOTACIONES ----
+# 7. ANOTACIONES ----
     # GUARDAR EN ARCHIVO DE TEXTO LAS ANOTACIONES ----
     observeEvent(input$saveAnnotations, {
         
@@ -1299,7 +1313,7 @@ app_server <- function(input, output, session ) {
     
     
     
-    # 9. TRAIN SIAMESE_MODEL ----
+# 8. TRAIN SIAMESE_MODEL ----
     observeEvent(input$siameseModelTrain, {
         
         output$featureModelMetrics <- NULL
@@ -1768,7 +1782,7 @@ app_server <- function(input, output, session ) {
                           selected = NULL)
     })
     
-    # 10. CHOOSE BEST SIAMESE_MODEL WEIGHTS EPOCHS AND DELETE THE OTHERS  ----     
+# 9. CHOOSE BEST SIAMESE_MODEL WEIGHTS EPOCHS AND DELETE THE OTHERS  ----     
     observeEvent(input$bestSiameseModelWeight, {
         
         shinyjs::disable(id = "experimento")
@@ -1847,6 +1861,559 @@ app_server <- function(input, output, session ) {
     
     
     
+# 10. ANALISIS Y PREDICCIONES SIAMESE MODEL ----
+    observeEvent(input$generarSiameseModelo, {
+        
+        shinyjs::disable(id = "experimento")
+        shinyjs::disable(id = "CrearExperimento")
+        shinyjs::disable(id = "NuevoExperimento")
+        
+        shinyjs::disable(id = "setType")
+        
+        shinyjs::disable(id = "BurstSnapshot")
+        shinyjs::disable(id = "stop_BurstSnapshot")
+        shinyjs::disable(id = "snapshot")
+        
+        shinyjs::disable(id = "etiqueta")
+        
+        shinyjs::disable(id = "siameseModelTrainBatchSize")
+        shinyjs::disable(id = "siameseModelTrainSteps")
+        shinyjs::disable(id = "siameseModelValidationBatchSize")
+        shinyjs::disable(id = "siameseModelValidationSteps")
+        shinyjs::disable(id = "siameseModelEmbedingSize")
+        shinyjs::disable(id = "siameseModelEpocas")
+        shinyjs::disable(id = "siameseModelTrain")
+        shinyjs::disable(id = "siameseModelBestEpoch")
+        shinyjs::disable(id = "bestSiameseModelWeight")
+        
+        shinyjs::disable(id = "chooseModel")
+        shinyjs::disable(id = "generarModelo")
+        shinyjs::disable(id = "prediction")
+        
+        shinyjs::disable(id = "chooseSiameseModel")
+        shinyjs::disable(id = "generarSiameseModelo")
+        shinyjs::disable(id = "predictionSiamese")
+        
+        # library(keras)
+        # keras::use_session_with_seed(11)
+        
+        siameseInFile <- input$chooseSiameseModel
+        
+        if (siameseInFile$name %>% stringr::str_remove(".*EmbSize") %>% stringr::str_remove("_.*") == "siameseModel") {
+            siameseModel_EmbedingSize <- input$siameseModelEmbedingSize %>% as.numeric()
+        } else {
+            siameseModel_EmbedingSize <- siameseInFile$name %>% stringr::str_remove(".*ES") %>% stringr::str_remove("_.*") %>% as.numeric()
+        }
+        
+        create_inference_model <- function(embedingSize = siameseModel_EmbedingSize) {
+            
+            left_input_tensor <- keras::layer_input(shape = c(imageWidth, imageHeight, 3), name = "left_input_tensor")
+            right_input_tensor <- keras::layer_input(shape = c(imageWidth, imageHeight, 3), name = "right_input_tensor")
+            
+            mob <- keras::application_mobilenet(input_shape = c(imageWidth, imageHeight, 3), include_top = FALSE,  
+                                                pooling = "avg")
+            
+            conv_base <- keras::keras_model_sequential() %>%
+                mob() %>%
+                keras::layer_flatten(name = "layerFlatten") %>% 
+                keras::layer_dense(units = 256, activation = "relu", name = "layerDense256") %>%
+                # layer_batch_normalization() %>%
+                # layer_dropout(rate = 0.4) %>%
+                keras::layer_dense(units = 128, activation = "relu", name = "layerDense128") %>%
+                # layer_batch_normalization() %>%
+                # layer_dropout(rate = 0.3) %>%
+                # layer_dense(units = 64, activation = "relu") %>%
+                # layer_batch_normalization() %>%
+                # layer_dropout(rate = 0.2) %>%
+                keras::layer_dense(units = embedingSize,  
+                                   activation = "relu", name = "layerDenseEmbedingSize") 
+            
+            left_output_tensor <- left_input_tensor  %>%
+                conv_base
+            
+            right_output_tensor <- right_input_tensor %>%
+                conv_base
+            
+            euclidean_distance <- function(vects) { 
+                c(x,y) %<-% vects
+                sum_square <- keras::k_sum(keras::k_square(x - y), axis = as.integer(0), keepdims = TRUE)
+                return(keras::k_sqrt(sum_square))
+            }
+            
+            euclidean_layer <- keras::layer_lambda(object = list(left_output_tensor, right_output_tensor), # To build self define layer, you must use layer_lamda
+                                                   f = euclidean_distance,
+                                                   name = "layerEuclidean")
+            
+            model <- keras::keras_model(list(left_input_tensor, right_input_tensor), euclidean_layer)
+            
+            # ContrastiveLoss <- function(x, y) { 
+            #     
+            #     margin <- 1.2
+            #     square_pred <- k_square(y)
+            #     margin_square <- k_square(k_maximum(margin - y, 0))
+            #     return(k_mean(x * square_pred + (1 - x) * margin_square))
+            # }
+            # 
+            # my_accuracy <- function(x, y) {
+            #     return(k_mean(k_equal(x, k_cast(y < 0.5, dtype = "float32"))))
+            # }
+            # 
+            # model %>%
+            #     compile(loss = ContrastiveLoss,     
+            #             optimizer = optimizer_adam(lr = 1e-4),     
+            #             metrics = my_accuracy)
+            
+            model
+        }
+        
+        values$inferenceModel <- create_inference_model()
+        
+        values$inferenceModel %>% keras::load_model_weights_hdf5(filepath = siameseInFile$datapath, 
+                                                   # by_name = TRUE
+        )
+        
+        
+        shinyjs::enable(id = "NuevoExperimento")
+        
+        shinyjs::enable(id = "setType")
+        
+        shinyjs::enable(id = "etiqueta")
+        
+        shinyjs::enable(id = "siameseModelTrainBatchSize")
+        shinyjs::enable(id = "siameseModelTrainSteps")
+        shinyjs::enable(id = "siameseModelValidationBatchSize")
+        shinyjs::enable(id = "siameseModelValidationSteps")
+        shinyjs::enable(id = "siameseModelEmbedingSize")
+        shinyjs::enable(id = "siameseModelEpocas")
+        shinyjs::enable(id = "siameseModelTrain")
+        shinyjs::enable(id = "siameseModelBestEpoch")
+        shinyjs::enable(id = "bestSiameseModelWeight")
+        
+        shinyjs::enable(id = "chooseModel")
+        # enable(id = "generarModelo")
+        shinyjs::enable(id = "prediction")
+        
+        shinyjs::enable(id = "chooseSiameseModel")
+        # enable(id = "generarSiameseModelo")
+        shinyjs::enable(id = "predictionSiamese")
+    })
+    
+    observeEvent(input$predictionSiamese, {
+        
+        shinyjs::disable(id = "experimento")
+        shinyjs::disable(id = "CrearExperimento")
+        shinyjs::disable(id = "NuevoExperimento")
+        
+        shinyjs::disable(id = "setType")
+        
+        shinyjs::disable(id = "BurstSnapshot")
+        shinyjs::disable(id = "stop_BurstSnapshot")
+        shinyjs::disable(id = "snapshot")
+        
+        shinyjs::disable(id = "etiqueta")
+        
+        shinyjs::disable(id = "siameseModelTrainBatchSize")
+        shinyjs::disable(id = "siameseModelTrainSteps")
+        shinyjs::disable(id = "siameseModelValidationBatchSize")
+        shinyjs::disable(id = "siameseModelValidationSteps")
+        shinyjs::disable(id = "siameseModelEmbedingSize")
+        shinyjs::disable(id = "siameseModelEpocas")
+        shinyjs::disable(id = "siameseModelTrain")
+        shinyjs::disable(id = "siameseModelBestEpoch")
+        shinyjs::disable(id = "bestSiameseModelWeight")
+        
+        shinyjs::disable(id = "chooseModel")
+        shinyjs::disable(id = "generarModelo")
+        shinyjs::disable(id = "prediction")
+        
+        shinyjs::disable(id = "chooseSiameseModel")
+        shinyjs::disable(id = "generarSiameseModelo")
+        shinyjs::disable(id = "predictionSiamese")
+        
+        # use_session_with_seed(11)
+        
+        workingFolderName <- shinyFiles::parseDirPath(volumes, input$WorkingDirectory)
+        numeroCaja <- input$caja
+        numeroExperimento <- input$experimento
+        
+        # experimentFolderName <- glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}")
+        
+        siameseInFile_Name <- input$chooseSiameseModel$name %>% gsub(".hdf5", "", .)
+        
+        
+        # toTestDataFrames <- function(dataFrame) {
+        #     
+        #     df <- dataFrame %>% 
+        #         dplyr::bind_rows() %>% 
+        #         dplyr::filter(stringr::str_detect(path, "Brightness100_Cam1") == TRUE) %>% 
+        #         dplyr::group_split(label)
+        # }
+        
+        # toAnchorsDataFrames <- function(dataFrame) {
+        #     
+        #     df <- dataFrame %>% 
+        #         dplyr::bind_rows() %>% 
+        #         #filter(str_detect(path, "Brightness100_cam1") == TRUE) %>% 
+        #         dplyr::filter(stringr::str_detect(path, "_20_Br|_29_Br")) %>%
+        #         dplyr::group_split(label)
+        # }
+        
+        # anchorsDataFramesList <- toTestDataFrames(dataFrame = valDataFramesList)
+        # anchorsDataFramesList <- toAnchorsDataFrames(dataFrame = valDataFramesList)
+        # readr::write_csv(anchorsDataFramesList %>% dplyr::bind_rows(),
+        #           path = glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/checkpoints/anchorsDataFrame_{siameseInFile_Name}.csv"))
+        # 
+        # trainImagesToTestDataFramesList <- toTestDataFrames(dataFrame = trainDataFramesList)
+        # readr::write_csv(trainImagesToTestDataFramesList %>% dplyr::bind_rows(),
+        #           path = glue::glue("{experimentFolderName}/checkpoints/trainImagesToTestDataFrame_{siameseInFile_Name}.csv"))
+        
+        # valImagesToTestDataFramesList <- toTestDataFrames(dataFrame = valDataFramesList)
+        # readr::write_csv(valImagesToTestDataFramesList %>% dplyr::bind_rows(),
+        #           path = glue::glue("{experimentFolderName}/checkpoints/valImagesToTestDataFrame_{siameseInFile_Name}.csv"))
+        
+        anchors_path <- glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Documentos/Reporte_Preprocesamiento_Anchor_Caja{numeroCaja}_Experimento{numeroExperimento}.csv")
+        print(anchors_path)
+        
+        anchorsDataFramesList <- readr::read_csv(anchors_path) %>%
+            dplyr::filter(Set == "Anchors") %>%
+            dplyr::filter(Transformacion == "Brightness100") %>%
+            dplyr::filter(Camara == "Cam1") %>%
+            dplyr::select(Instrumento, Path)
+        print(anchorsDataFramesList)
+        
+        test_path <- glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Documentos/Reporte_Preprocesamiento_Test_Caja{numeroCaja}_Experimento{numeroExperimento}.csv")
+        print(test_path)
+        
+        testImagesToTestDataFramesList <- readr::read_csv(test_path) %>%
+            dplyr::filter(Set == "Test") %>%
+            dplyr::filter(Transformacion == "Brightness100") %>%
+            dplyr::filter(Camara == "Cam1") %>%
+            dplyr::select(Instrumento, Path)
+        print(testImagesToTestDataFramesList)
+        
+        # testImagesToTestDataFramesList <- toTestDataFrames(dataFrame = testDataFramesList)
+        # readr::write_csv(testImagesToTestDataFramesList %>% dplyr::bind_rows(),
+        #           path = glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/checkpoints/testImagesToTestDataFrame_{siameseInFile_Name}.csv"))
+        # 
+        # dissimilarityViewr2 <- function(classLeft, classRight, imagesToTestDataFramesList) {
+        #     
+        #     number_left <- classLeft
+        #     filter_idx_left <- sample_n(imagesToTestDataFramesList[[number_left]], 1)
+        #     img_left <- filter_idx_left$path
+        #     label_left <- filter_idx_left$label
+        #     img_input_left <- image_read(img_left) %>%
+        #         image_edge() %>% 
+        #         image_negate() %>% 
+        #         image_data('rgb') %>%  
+        #         as.integer() %>%
+        #         image_to_array() %>%
+        #         array_reshape(c(1, imgRows, imgCols, 3))
+        #     img_input_left <- img_input_left/255
+        #     
+        #     number_right <- classRight
+        #     filter_idx_right <- sample_n(anchorsDataFramesList[[number_right]], 1) 
+        #     img_right <- filter_idx_right$path
+        #     label_right <- filter_idx_right$label
+        #     img_input_right <- image_read(img_right) %>%
+        #         image_edge() %>% 
+        #         image_negate() %>% 
+        #         image_data('rgb') %>%  
+        #         as.integer() %>%
+        #         image_to_array() %>%
+        #         array_reshape(c(1, imgRows, imgCols, 3))
+        #     img_input_right <- img_input_right/255
+        #     
+        #     dissim <- inferenceModel %>% predict(list(img_input_left, img_input_right))
+        #     
+        #     par(mar = c(0,0,4,0))
+        #     plot(as.raster(abind(img_input_left[1,,,],
+        #                          img_input_right[1,,,],
+        #                          along = 2)))
+        #     title(main = paste0(to_screaming_snake_case(label_left, sep_out = " "),
+        #                         " vs. ",
+        #                         to_screaming_snake_case(label_right, sep_out = " "),
+        #                         "\n",
+        #                         "\n Dissimilarity: ",
+        #                         round(dissim, 4)))
+        #     
+        # }
+        # 
+        # dissimilarityViewr2(classLeft = 1, classRight = 1, imagesToTestDataFramesList = trainImagesToTestDataFramesList)
+        # dissimilarityViewr2(classLeft = 1, classRight = 1, imagesToTestDataFramesList = valImagesToTestDataFramesList)
+        # dissimilarityViewr2(classLeft = 1, classRight = 1, imagesToTestDataFramesList = testImagesToTestDataFramesList)
+        
+        dissimilarity <- function(dataSet, imagesToTestDataFramesList) {
+            
+            set <- dataSet
+            testDataFrames_tbl <- imagesToTestDataFramesList %>% dplyr::bind_rows()
+            anchorsDataFrames_tbl <- anchorsDataFramesList %>% dplyr::bind_rows()
+            diss <- tibble::tibble()
+            imageLeft <- tibble::tibble()
+            imageRight <- tibble::tibble()
+            imageLeftTemp <- matrix(ncol = 1, nrow = nrow(anchorsDataFrames_tbl)) %>% tibble::as_tibble()
+            imageRightTemp <- matrix(ncol = 1, nrow = nrow(anchorsDataFrames_tbl)) %>% tibble::as_tibble()
+            labelLeft <- tibble::tibble()
+            labelRight <- tibble::tibble()
+            dissTemp <- matrix(ncol = 1, nrow = nrow(anchorsDataFrames_tbl)) %>% tibble::as_tibble()
+            labelLeftTemp <- matrix(ncol = 1, nrow = nrow(anchorsDataFrames_tbl)) %>% tibble::as_tibble()
+            labelRightTemp <- matrix(ncol = 1, nrow = nrow(anchorsDataFrames_tbl)) %>% tibble::as_tibble()
+            for (i in 1:as.integer(nrow(testDataFrames_tbl))) {
+                
+                shinyWidgets::updateProgressBar(session = session, id = "pb4", value = (i/as.integer(nrow(testDataFrames_tbl)))*100)
+                Sys.sleep(0.1)
+                
+                filter_idx_left <- testDataFrames_tbl[i,]
+                print(filter_idx_left)
+                img_left <- filter_idx_left$Path
+                print(img_left)
+                label_img_left <- filter_idx_left$Instrumento
+                print(label_img_left)
+                
+                imgInputLeft <- magick::image_read(img_left) %>%
+                    # image_edge() %>% 
+                    # image_negate() %>% 
+                    magick::image_resize(geometry = magick::geometry_size_pixels(width = imageWidth, height = imageHeight, preserve_aspect = F)) %>% #opcional, usado para experimento_70
+                    magick::image_data('rgb') %>%  
+                    as.integer() %>%
+                    keras::image_to_array() %>%
+                    reticulate::array_reshape(c(1, imageWidth, imageHeight, 3))
+                imgInputLeft <- imgInputLeft/255   
+                
+                
+                for (j in 1:as.integer(nrow(anchorsDataFrames_tbl))) {
+                    
+                    
+                    filter_idx_right <- anchorsDataFrames_tbl[j,]
+                    img_right <- filter_idx_right$Path
+                    label_img_right <- filter_idx_right$Instrumento
+                    
+                    imgInputRight <- magick::image_read(img_right) %>%
+                        # image_edge() %>% 
+                        # image_negate() %>% 
+                        magick::image_resize(geometry = magick::geometry_size_pixels(width = imageWidth, height = imageHeight, preserve_aspect = F)) %>% #opcional, usado para experimento_70
+                        magick::image_data('rgb') %>%  
+                        as.integer() %>%
+                        keras::image_to_array() %>%
+                        reticulate::array_reshape(c(1, imageWidth, imageHeight, 3))
+                    imgInputRight <- imgInputRight/255
+                    
+                    dissTemp[j,] <- values$inferenceModel %>% keras::predict_on_batch(list(imgInputLeft, imgInputRight))
+                    print(dissTemp[j,])
+                    
+                    imageLeftTemp[j,] <- gsub(glue::glue(".*/|_Brightness.*"), "", img_left)
+                    imageRightTemp[j,] <- gsub(glue::glue(".*/|_Brightness.*"), "", img_right)
+                    
+                    labelLeftTemp[j,] <- paste0(label_img_left)
+                    labelRightTemp[j,] <- paste0(label_img_right)
+                    
+                    
+                }
+                
+                imageLeft <- dplyr::bind_rows(imageLeft, imageLeftTemp)
+                imageRight <- dplyr::bind_rows(imageRight, imageRightTemp)
+                
+                diss <- dplyr::bind_rows(diss, dissTemp) 
+                
+                labelLeft <- dplyr::bind_rows(labelLeft, labelLeftTemp)
+                labelRight <- dplyr::bind_rows(labelRight, labelRightTemp)
+                
+            }
+            
+            dissList <- dplyr::bind_cols(imageLeft, imageRight, labelLeft, diss, labelRight) %>%
+                # rename(imagen = V1, anchor = V11, clase_real = V12, dist = V13, clase_referencia = V14) %>%
+                dplyr::rename(imagen = V1...1, anchor = V1...2, clase_real = V1...3, dist = V1...4, clase_referencia = V1...5) %>%
+                dplyr::mutate(clase_real = clase_real %>% forcats::as_factor(),
+                       clase_referencia = clase_referencia %>% forcats::as_factor()) %>% 
+                dplyr::group_split(clase_real)
+            
+            # liveTime <- chartr(" :-", "___", format(Sys.time(), "%F %X"))
+            for (i in 1:length(dissList)) {
+                
+                clase <- dissList[[i]][1, 3] %>% dplyr::mutate_at("clase_real", as.character)
+                
+                ggplot2::ggplot(data = dissList[[i]] %>% dplyr::select(dist, clase_referencia) %>% reshape2::melt("clase_referencia"),
+                       ggplot2::aes(x = clase_referencia, y = value, group = clase_referencia)) + 
+                    ggplot2::geom_boxplot(outlier.colour = "red", outlier.shape = 1) +
+                    ggplot2::labs(title = glue::glue("Inference Distance {clase}"), 
+                         subtitle = glue::glue("{siameseInFile_Name}"),
+                         caption = glue::glue("Experimento{numeroExperimento} - {siameseInFile_Name}"),
+                         y = "distancia") + 
+                    ggplot2::geom_hline(yintercept = 1, color = "red") +
+                    ggplot2::coord_flip() +
+                    ggplot2::coord_polar(theta = "x") +
+                    ggplot2::theme_bw() +
+                    ggplot2::xlab(NULL)
+                
+                ggplot2::ggsave(glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Resultados_Training/inferenceDistance_{clase}_Experimento{numeroExperimento}_{siameseInFile_Name}.png"))
+                
+            }
+            
+            dissList
+        }
+        
+        # trainDissimilarityList <- dissimilarity(dataSet = "train", imagesToTestDataFramesList = trainImagesToTestDataFramesList)
+        # write_csv(trainDissimilarityList %>% bind_rows(), 
+        #           path = glue("{experimentFolderName}/checkpoints/trainDissimilarity_{siameseInFile_Name}.csv"))
+        # trainPrediction_tbl <- trainDissimilarityList %>%
+        #     bind_rows() %>% 
+        #     group_by(imagen_left) %>% 
+        #     summarise(id = which.min(dist),
+        #               imagen_right = imagen_right[id],
+        #               min_dist = dist[id],
+        #               clase_real = clase_real[id],
+        #               clase_predicha = clase_referencia[id]) %>% 
+        #     select(id, everything())
+        # write_csv(trainPrediction_tbl, path = glue("{experimentFolderName}/checkpoints/prediccionesTrain_{siameseInFile_Name}.csv"))
+        # output$PrediccionesTrainSiamese <- DT::renderDataTable({
+        #     DT::datatable(trainPrediction_tbl %>% 
+        #                       select(clase_predicha, min_dist) %>% 
+        #                       mutate_if(is.numeric, round, 4),
+        #                   options = list(lengthMenu = list(c(5, 15, -1), c("5", "15", "All")),
+        #                                  pageLength = 5))
+        # })
+        # 
+        # output$confusionMatrixTrainSiamese <- renderPrint({
+        #     confusionMatrix(trainPrediction_tbl$clase_real, trainPrediction_tbl$clase_predicha)
+        # })
+        # 
+        # 
+        # 
+        # 
+        # 
+        # valDissimilarityList <- dissimilarity(dataSet = "validation", imagesToTestDataFramesList = valImagesToTestDataFramesList)
+        # write_csv(valDissimilarityList %>% bind_rows(),
+        #           path = glue("{experimentFolderName}/checkpoints/valDissimilarity_{siameseInFile_Name}.csv"))
+        # valPrediction_tbl <- valDissimilarityList %>%
+        #     bind_rows() %>% 
+        #     group_by(imagen_left) %>% 
+        #     summarise(id = which.min(dist),
+        #               imagen_right = imagen_right[id],
+        #               min_dist = dist[id],
+        #               clase_real = clase_real[id],
+        #               clase_predicha = clase_referencia[id]) %>% 
+        #     select(id, everything())
+        # write_csv(valPrediction_tbl, path = glue("{experimentFolderName}/checkpoints/prediccionesValidation_{siameseInFile_Name}.csv"))
+        # output$PrediccionesValidationSiamese <- DT::renderDataTable({
+        #     DT::datatable(valPrediction_tbl %>% 
+        #                       select(clase_predicha, min_dist) %>% 
+        #                       mutate_if(is.numeric, round, 4),
+        #                   options = list(lengthMenu = list(c(5, 15, -1), c("5", "15", "All")),
+        #                                  pageLength = 5))
+        # })
+        # 
+        # output$confusionMatrixValidationSiamese <- renderPrint({
+        #     confusionMatrix(valPrediction_tbl$clase_real, valPrediction_tbl$clase_predicha)
+        # })
+        
+        
+        testDissimilarityList <- dissimilarity(dataSet = "Test", imagesToTestDataFramesList = testImagesToTestDataFramesList)
+        readr::write_csv(testDissimilarityList %>% dplyr::bind_rows(),
+                  path = glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Resultados_Training/testDissimilarity_{siameseInFile_Name}.csv"))
+        testPrediction_tbl <- testDissimilarityList %>%
+            dplyr::bind_rows() %>% 
+            dplyr::group_by(imagen) %>% 
+            dplyr::summarise(id = which.min(dist),
+                      anchor = anchor[id],
+                      min_dist = dist[id],
+                      clase_real = clase_real[id],
+                      clase_predicha = clase_referencia[id]) %>% 
+            dplyr::mutate(check = ifelse(clase_real == clase_predicha, 1, 0)) %>%
+            dplyr::select(id, tidyselect::everything())
+        readr::write_csv(testPrediction_tbl, path = glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Resultados_Training/prediccionesTest_{siameseInFile_Name}.csv"))
+        output$PrediccionesTestSiamese <- DT::renderDataTable({
+            DT::datatable(testPrediction_tbl %>% 
+                              dplyr::select(imagen, anchor, clase_real, clase_predicha, min_dist, check) %>% 
+                              dplyr::mutate_if(is.numeric, round, 4),
+                          options = list(lengthMenu = list(c(5, 15, -1), c("5", "15", "All")),
+                                         pageLength = 5))
+        })
+        
+        # output$confusionMatrixTestSiamese <- renderPrint({
+        #     confusionMatrix(testPrediction_tbl$clase_real, testPrediction_tbl$clase_predicha)
+        # })
+        
+        confMatrixTestSiamese <- caret::confusionMatrix(testPrediction_tbl$clase_predicha,
+                                                 testPrediction_tbl$clase_real)
+        
+        table <- data.frame(confMatrixTestSiamese$table)
+        
+        plotTable <- table %>% 
+            dplyr::mutate(goodbad = ifelse(Prediction == Reference, "good",
+                                    ifelse(Freq == 0, "neutral" ,"bad"))) %>% 
+            dplyr::group_by(Reference) %>% 
+            dplyr::mutate(prop = Freq/sum(Freq))
+        
+        metricsOverall_tbl <- confMatrixTestSiamese$overall %>% 
+            as.data.frame() %>% 
+            tibble::rownames_to_column(var = "metric") %>% 
+            dplyr::rename(value = ".") %>% 
+            tibble::as_tibble() %>% 
+            dplyr::mutate_if(is.numeric, round, 4)
+        readr::write_csv(metricsOverall_tbl, path = glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Resultados_Training/metricsOverall_{siameseInFile_Name}.csv"))
+        
+        if (length(levels(testPrediction_tbl$clase_real)) == 2) {
+            metricsByClass_tbl <- confMatrixTestSiamese$byClass %>% 
+                as.data.frame() %>% 
+                tibble::rownames_to_column(var = "metric") %>% 
+                dplyr::rename(value = ".") %>% 
+                tibble::as_tibble() %>% 
+                dplyr::mutate_if(is.numeric, round, 4)
+            readr::write_csv(metricsByClass_tbl, path = glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Resultados_Training/metricsByClass_{siameseInFile_Name}.csv"))
+        } else {
+            metricsByClass_tbl <- confMatrixTestSiamese$byClass %>% 
+                as.data.frame() %>% 
+                tibble::as_tibble(rownames = "Clases") %>% 
+                dplyr::mutate_if(is.numeric, round, 4)
+            readr::write_csv(metricsByClass_tbl, path = glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Resultados_Training/metricsByClass_{siameseInFile_Name}.csv"))
+        }
+        
+        output$confusionMatrixTestSiamese <- shiny::renderPlot({
+            confusionMatrixTestSiamesePlot <- ggplot2::ggplot(data = plotTable, mapping = ggplot2::aes(x = Reference, y = Prediction, fill = goodbad, alpha = prop)) +
+                ggplot2::geom_tile() +
+                ggplot2::geom_text(ggplot2::aes(label = Freq), vjust = .5, fontface  = "bold", alpha = 1) +
+                ggplot2::scale_fill_manual(values = c(good = "green", bad = "red", neutral = "white")) +
+                ggplot2::theme_bw() +
+                ggplot2::scale_x_discrete(guide = ggplot2::guide_axis(n.dodge = 2), limits = rev(levels(table$Reference))) +
+                ggplot2::theme(legend.position = "none")
+            
+            print(confusionMatrixTestSiamesePlot)
+            
+            ggplot2::ggsave(glue::glue("{workingFolderName}/Caja{numeroCaja}/Experimento{numeroExperimento}/Resultados_Training/ConfusionMatrix_{siameseInFile_Name}.png"))
+        })
+        
+        output$PrediccionesTestSiameseMetricsOverall <- DT::renderDataTable({
+            DT::datatable(metricsOverall_tbl)
+        })
+        
+        output$PrediccionesTestSiameseMetricsByClass <- DT::renderDataTable({
+            DT::datatable(metricsByClass_tbl)
+        })
+        
+        shinyjs::enable(id = "NuevoExperimento")
+        
+        shinyjs::enable(id = "setType")
+        
+        shinyjs::enable(id = "etiqueta")
+        
+        shinyjs::enable(id = "siameseModelTrainBatchSize")
+        shinyjs::enable(id = "siameseModelTrainSteps")
+        shinyjs::enable(id = "siameseModelValidationBatchSize")
+        shinyjs::enable(id = "siameseModelValidationSteps")
+        shinyjs::enable(id = "siameseModelEmbedingSize")
+        shinyjs::enable(id = "siameseModelEpocas")
+        shinyjs::enable(id = "siameseModelTrain")
+        shinyjs::enable(id = "siameseModelBestEpoch")
+        shinyjs::enable(id = "bestSiameseModelWeight")
+        
+        shinyjs::enable(id = "chooseModel")
+        # enable(id = "generarModelo")
+        shinyjs::enable(id = "prediction")
+        
+        shinyjs::enable(id = "chooseSiameseModel")
+        # enable(id = "generarSiameseModelo")
+        shinyjs::enable(id = "predictionSiamese")
+        
+    })
     
     
     
@@ -1855,8 +2422,7 @@ app_server <- function(input, output, session ) {
     
     
     
-    
-    # 15. CONECTAR ARDUINO ----
+# 11. CONECTAR ARDUINO ----
     # Observe ports ----
     observeEvent(input$ports, {
         
@@ -1891,7 +2457,7 @@ app_server <- function(input, output, session ) {
         shinyjs::enable(id = "chooseProductionModel")
     })
     
-    # 16. INFERENCE SIAMESE MODEL ----
+# 12. INFERENCE SIAMESE MODEL ----
     # Observe generarProductionModel ----
     observeEvent(input$generarProductionModel, {
         
@@ -2066,6 +2632,7 @@ app_server <- function(input, output, session ) {
                 anchorsDataFramesList <- readr::read_csv(anchors_path) %>%
                     dplyr::filter(Set == "Anchors") %>%
                     dplyr::filter(Transformacion == "Brightness100") %>%
+                    dplyr::filter(Camara == "Cam1") %>%
                     dplyr::select(Instrumento, Path)
                 
                 # Funcion de Disimilaridad inferenceSnapshot ----
@@ -2751,6 +3318,7 @@ app_server <- function(input, output, session ) {
             anchorsDataFramesList <- readr::read_csv(anchors_path) %>%
                 dplyr::filter(Set == "Anchors") %>%
                 dplyr::filter(Transformacion == "Brightness100") %>%
+                dplyr::filter(Camara == "Cam1") %>%
                 dplyr::select(Instrumento, Path)
             # %>%
             #     mutate(Path = gsub(".*/Caja", "", Path))

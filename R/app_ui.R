@@ -987,7 +987,140 @@ app_ui <- function(request) {
                            
                            
                            
-                           
+                           # TAB 3: Analysis and Results Siamese Model ----
+                           tabPanel("Testing",
+                                    
+                                    sidebarLayout(
+                                        
+                                        sidebarPanel(width = 3,
+                                            
+                                            # Campo para ingresar el modelo final ----
+                                            div(style = "width: 170px;
+                                                     font: bold 16px 'Helvetica Neue', Helvetica, Arial, sans-serif;",
+                                                "Escoger Modelo"),
+                                            
+                                            div(style = "display: inline-block;
+                                                     vertical-align:top;
+                                                     width: 330px;",
+                                                shinyjs::disabled(fileInput(inputId = "chooseSiameseModel",
+                                                                            label = NULL,
+                                                                            accept = c(".hdf5"),
+                                                                            width = "330px",
+                                                                            buttonLabel = ".hdf5",
+                                                                            placeholder = "Seleccionar archivo")),
+                                                tags$style("#chooseSiameseModel {background-color: black;
+                                                                                font-family: sans serif;
+                                                                                font-size: 15px;
+                                                                                color: white;
+                                                                                box-shadow: 5px 5px 5px grey;
+                                                                                border-radius: 5px}")),
+                                            
+                                            # Boton para generar el modelo final ----
+                                            div(style = "display: inline-block;
+                                                     vertical-align:top;
+                                                     width: 150px;",
+                                                shinyjs::disabled(actionButton(inputId = "generarSiameseModelo",
+                                                                               label = "Generar modelo",
+                                                                               size = "lg")),
+                                                tags$style("#generarSiameseModelo {background-color: black;
+                                                                                 font-family: sans serif;
+                                                                                 font-size: 15px;
+                                                                                 color: white;
+                                                                                 box-shadow: 5px 5px 5px grey;
+                                                                                 border-radius: 5px}")),
+                                            
+                                            
+                                            # shinyjs::disabled(fileInput(inputId = "chooseSiameseModel", 
+                                            #                    label = "Choose Model",
+                                            #                    accept = c(".hdf5")
+                                            # )),
+                                            # 
+                                            # br(),
+                                            
+                                            # Boton para generar el modelo final ----
+                                            # shinyjs::disabled(actionButton(inputId = "generarSiameseModelo", 
+                                            #                       label = "Generar Modelo",
+                                            #                       style = "background-color: black;
+                                            #       font-family: sans serif;
+                                            #       font-size: 15px;
+                                            #       color: white;
+                                            #       box-shadow: 5px 5px 5px grey;
+                                            #       border-radius: 5px")),
+                                            # 
+                                            # br(),
+                                            # br(),
+                                            
+                                            # Boton para generar predicciones ----
+                                            div(style = "display: inline-block;
+                                                     vertical-align:top;
+                                                     width: 70px;",
+                                            shinyjs::disabled(actionButton(inputId = "predictionSiamese", 
+                                                                  label = "Predecir",
+                                                                  size = "lg")),
+                                            tags$style("#predictionSiamese {background-color: black;
+                                                                                 font-family: sans serif;
+                                                                                 font-size: 15px;
+                                                                                 color: white;
+                                                                                 box-shadow: 5px 5px 5px grey;
+                                                                                 border-radius: 5px}")),
+                                            
+                                            br(),
+                                            br(),
+                                            
+                                            shinyWidgets::progressBar(id = "pb4", value = 0, display_pct = TRUE, striped = TRUE)
+                                        ),
+                                        
+                                        mainPanel(
+                                            
+                                            # tabsetPanel(
+                                            #     
+                                            #     # Pestagna resultados Training ----                                    
+                                            #     tabPanel("Training",
+                                            #              
+                                            #              br(),
+                                            #              
+                                            #              DT::dataTableOutput(outputId = "PrediccionesTrainSiamese"),
+                                            #              
+                                            #              br(),
+                                            #              
+                                            #              verbatimTextOutput(outputId = "confusionMatrixTrainSiamese")),
+                                            #     # br(),
+                                            #     
+                                            #     # Pestagna resultados Validating ----
+                                            #     tabPanel("Validating",
+                                            #              
+                                            #              br(),
+                                            #              
+                                            #              DT::dataTableOutput(outputId = "PrediccionesValidationSiamese"),
+                                            #              
+                                            #              br(),
+                                            #              
+                                            #              verbatimTextOutput(outputId = "confusionMatrixValidationSiamese")),
+                                            #     # br(),
+                                            #     
+                                            #     # Pestagna resultados Testing ----
+                                            #     tabPanel("Testing",
+                                            #              
+                                            #              br(),
+                                                         
+                                                         DT::dataTableOutput(outputId = "PrediccionesTestSiamese"),
+                                                         
+                                                         br(),
+                                                         
+                                                         # verbatimTextOutput(outputId = "confusionMatrixTestSiamese"),
+                                                         plotOutput(outputId = "confusionMatrixTestSiamese"),
+                                                         
+                                                         br(),
+                                                         
+                                                         DT::dataTableOutput(outputId = "PrediccionesTestSiameseMetricsOverall"),
+                                                         
+                                                         br(),
+                                                         
+                                                         DT::dataTableOutput(outputId = "PrediccionesTestSiameseMetricsByClass")
+                                            # )
+                                            # )
+                                            )
+                                    )),
                            
                            
                            
@@ -1274,7 +1407,7 @@ app_ui <- function(request) {
                            # Layout pestagnas ----
                            tags$head(
                                tags$style(HTML(".navbar-nav {float: none !important;}
-                                    .navbar-nav > li:nth-child(4) {float: right;}")))
+                                    .navbar-nav > li:nth-child(5) {float: right;}")))
                            
          ) # end navbarPage
         ) # end fluidPage

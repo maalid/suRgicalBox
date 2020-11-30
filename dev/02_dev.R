@@ -34,8 +34,9 @@ usethis::use_package( "shinymanager" )
 usethis::use_package( "WVPlots" )
 usethis::use_package( "abind" )
 usethis::use_package( "tidyr" )
-
-    
+usethis::use_package( "shinyWidgets" )
+usethis::use_package( "caret" )
+usethis::use_package( "tidyselect" )
     
 # ## Add modules ----
 # ## Create a module infrastructure in R/
