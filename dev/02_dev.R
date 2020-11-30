@@ -33,6 +33,7 @@ usethis::use_package( "reshape2" )
 usethis::use_package( "shinymanager" )
 usethis::use_package( "WVPlots" )
 usethis::use_package( "abind" )
+usethis::use_package( "tidyr" )
 
     
     
